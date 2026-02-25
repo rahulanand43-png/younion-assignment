@@ -1,0 +1,1884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Younion · 3rd Party Intent Signal Engine</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;0,9..144,900;1,9..144,400&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --void: #07090f;
+  --deep: #0d1117;
+  --surface: #121820;
+  --card: #161e28;
+  --border: #1e2a38;
+  --border2: #253347;
+  --text: #dce6f0;
+  --muted: #5a7080;
+  --muted2: #3d5468;
+  --surge: #ff6b35;
+  --surge-dim: rgba(255,107,53,0.1);
+  --gold: #f5c518;
+  --gold-dim: rgba(245,197,24,0.1);
+  --blue: #3b9eff;
+  --blue-dim: rgba(59,158,255,0.1);
+  --green: #00d68f;
+  --green-dim: rgba(0,214,143,0.08);
+  --red: #ff4757;
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--void);
+  color: var(--text);
+  font-family: 'Space Grotesk', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── NAV ── */
+.nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(7,9,15,0.92);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  height: 52px;
+}
+
+.nav-logo {
+  font-family: 'Fraunces', serif;
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: var(--surge);
+  margin-right: 2.5rem;
+  letter-spacing: -0.5px;
+  white-space: nowrap;
+}
+
+.nav-tabs { display: flex; gap: 0; }
+
+.nav-tab {
+  padding: 0 1.1rem;
+  height: 52px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.nav-tab:hover { color: var(--text); }
+.nav-tab.active { color: var(--surge); border-bottom-color: var(--surge); }
+
+.nav-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.live-pill {
+  display: flex; align-items: center; gap: 0.4rem;
+  background: var(--green-dim);
+  border: 1px solid rgba(0,214,143,0.2);
+  border-radius: 100px;
+  padding: 0.3rem 0.8rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.58rem;
+  color: var(--green);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.live-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: blink 1.6s infinite;
+}
+
+/* ── SECTIONS ── */
+.section { display: none; }
+.section.active { display: block; }
+
+/* ── EXPLAINER SECTION ── */
+.explainer { max-width: 980px; margin: 0 auto; padding: 3rem 2rem; }
+
+.ex-hero {
+  margin-bottom: 3.5rem;
+  animation: fadeUp 0.5s ease both;
+}
+
+.ex-hero .tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--surge);
+  background: var(--surge-dim);
+  border: 1px solid rgba(255,107,53,0.2);
+  padding: 0.3rem 0.9rem;
+  border-radius: 100px;
+  display: inline-block;
+  margin-bottom: 1.2rem;
+}
+
+.ex-hero h1 {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(2rem, 5vw, 3.8rem);
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: -1px;
+  margin-bottom: 1rem;
+}
+
+.ex-hero h1 em {
+  font-style: italic;
+  color: var(--surge);
+  font-weight: 300;
+}
+
+.ex-hero p {
+  font-size: 1rem;
+  color: var(--muted);
+  max-width: 600px;
+  line-height: 1.7;
+  font-weight: 300;
+}
+
+/* How it works flow */
+.how-flow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  margin: 2.5rem 0;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  animation: fadeUp 0.5s 0.1s ease both;
+}
+
+@media(max-width:800px){ .how-flow{ grid-template-columns:1fr 1fr; } }
+
+.flow-step {
+  padding: 1.5rem;
+  border-right: 1px solid var(--border);
+  position: relative;
+}
+
+.flow-step:last-child { border-right: none; }
+
+.flow-num {
+  font-family: 'Fraunces', serif;
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: var(--border2);
+  line-height: 1;
+  margin-bottom: 0.75rem;
+}
+
+.flow-step h4 {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+}
+
+.flow-step p {
+  font-size: 0.75rem;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.flow-icon {
+  font-size: 1.4rem;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+/* What is Bombora */
+.bombora-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 2rem;
+  margin: 2rem 0;
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 2rem;
+  animation: fadeUp 0.5s 0.15s ease both;
+}
+
+@media(max-width:700px){ .bombora-card{ grid-template-columns:1fr; } }
+
+.bombora-card h3 {
+  font-family: 'Fraunces', serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+}
+
+.bombora-card p {
+  font-size: 0.83rem;
+  color: var(--muted);
+  line-height: 1.7;
+  margin-bottom: 1rem;
+}
+
+.bombora-stat-row {
+  display: flex; flex-direction: column; gap: 0.75rem;
+  justify-content: center;
+}
+
+.b-stat {
+  background: var(--deep);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.b-stat-num {
+  font-family: 'Fraunces', serif;
+  font-size: 1.8rem;
+  font-weight: 900;
+  line-height: 1;
+  color: var(--surge);
+}
+
+.b-stat-label {
+  font-size: 0.72rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+/* Signal anatomy */
+.signal-anatomy {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  margin: 2rem 0;
+  animation: fadeUp 0.5s 0.2s ease both;
+}
+
+.anatomy-header {
+  padding: 1.25rem 1.75rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.anatomy-header h3 {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.anatomy-body { padding: 1.5rem 1.75rem; }
+
+.signal-field-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+@media(max-width:700px){ .signal-field-grid{ grid-template-columns:1fr 1fr; } }
+
+.sig-field {
+  background: var(--deep);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.sig-field-key {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--blue);
+  letter-spacing: 0.08em;
+  margin-bottom: 0.35rem;
+  text-transform: uppercase;
+}
+
+.sig-field-val {
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin-bottom: 0.2rem;
+}
+
+.sig-field-desc {
+  font-size: 0.68rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+/* Topic chips */
+.topic-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 1rem 0; }
+
+.chip {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  padding: 0.28rem 0.7rem;
+  border-radius: 6px;
+  letter-spacing: 0.04em;
+}
+
+.chip-surge { background: var(--surge-dim); color: var(--surge); border: 1px solid rgba(255,107,53,0.25); }
+.chip-blue { background: var(--blue-dim); color: var(--blue); border: 1px solid rgba(59,158,255,0.25); }
+.chip-gold { background: var(--gold-dim); color: var(--gold); border: 1px solid rgba(245,197,24,0.25); }
+.chip-green { background: var(--green-dim); color: var(--green); border: 1px solid rgba(0,214,143,0.2); }
+.chip-muted { background: rgba(90,112,128,0.12); color: var(--muted); border: 1px solid rgba(90,112,128,0.2); }
+
+/* Step cards for explainer */
+.step-cards { display: flex; flex-direction: column; gap: 1.25rem; margin: 2rem 0; }
+
+.step-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1.5rem 2rem;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1.5rem;
+  align-items: flex-start;
+  animation: fadeUp 0.4s ease both;
+}
+
+.step-num-big {
+  font-family: 'Fraunces', serif;
+  font-size: 3rem;
+  font-weight: 900;
+  line-height: 0.85;
+  color: var(--border2);
+  width: 50px;
+  flex-shrink: 0;
+}
+
+.step-card h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+}
+
+.step-card > div > p {
+  font-size: 0.82rem;
+  color: var(--muted);
+  line-height: 1.65;
+  margin-bottom: 0.75rem;
+}
+
+.action-list { list-style: none; }
+
+.action-list li {
+  font-size: 0.8rem;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.action-list li:last-child { border: none; }
+
+.action-list li::before {
+  content: '→';
+  color: var(--surge);
+  font-size: 0.7rem;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.action-list li strong { color: var(--text); }
+
+/* ── SAMPLE DATA SECTION ── */
+.data-section { max-width: 1200px; margin: 0 auto; padding: 2.5rem 2rem; }
+
+.section-header {
+  margin-bottom: 2rem;
+  animation: fadeUp 0.4s ease both;
+}
+
+.section-header .eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--surge);
+  margin-bottom: 0.6rem;
+}
+
+.section-header h2 {
+  font-family: 'Fraunces', serif;
+  font-size: 1.8rem;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  margin-bottom: 0.4rem;
+}
+
+.section-header p {
+  font-size: 0.85rem;
+  color: var(--muted);
+  max-width: 600px;
+  line-height: 1.6;
+}
+
+/* Data table */
+.data-table-wrap {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  animation: fadeUp 0.4s 0.1s ease both;
+}
+
+.table-toolbar {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.toolbar-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  color: var(--muted);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  flex: 1;
+}
+
+.filter-btn {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid var(--border2);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.filter-btn.active, .filter-btn:hover {
+  background: var(--surge-dim);
+  border-color: rgba(255,107,53,0.3);
+  color: var(--surge);
+}
+
+.data-table-scroll { overflow-x: auto; }
+
+table.intent-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 900px;
+}
+
+table.intent-table th {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 0.75rem 1.25rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+  background: var(--deep);
+}
+
+table.intent-table td {
+  padding: 0.9rem 1.25rem;
+  font-size: 0.8rem;
+  border-bottom: 1px solid rgba(30,42,56,0.6);
+  vertical-align: middle;
+}
+
+table.intent-table tr:hover td { background: rgba(255,107,53,0.02); }
+table.intent-table tr:last-child td { border-bottom: none; }
+
+.company-cell { display: flex; align-items: center; gap: 0.75rem; }
+
+.company-logo {
+  width: 30px; height: 30px;
+  border-radius: 7px;
+  background: var(--border2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  color: var(--text);
+}
+
+.company-name { font-weight: 600; font-size: 0.82rem; }
+.company-domain { font-family: 'JetBrains Mono', monospace; font-size: 0.62rem; color: var(--muted); }
+
+/* Surge meter */
+.surge-meter {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.surge-bar-bg {
+  width: 80px; height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.surge-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.8s ease;
+}
+
+.surge-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  font-weight: 500;
+  width: 28px;
+}
+
+/* Intent badge */
+.intent-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  padding: 0.28rem 0.65rem;
+  border-radius: 100px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.badge-high { background: var(--surge-dim); color: var(--surge); border: 1px solid rgba(255,107,53,0.25); }
+.badge-med { background: var(--gold-dim); color: var(--gold); border: 1px solid rgba(245,197,24,0.25); }
+.badge-low { background: var(--blue-dim); color: var(--blue); border: 1px solid rgba(59,158,255,0.2); }
+
+.score-circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  font-family: 'Fraunces', serif;
+  font-size: 0.9rem;
+  font-weight: 900;
+}
+
+.sc-high { background: var(--surge-dim); color: var(--surge); border: 2px solid rgba(255,107,53,0.3); }
+.sc-med { background: var(--gold-dim); color: var(--gold); border: 2px solid rgba(245,197,24,0.25); }
+.sc-low { background: var(--blue-dim); color: var(--blue); border: 2px solid rgba(59,158,255,0.2); }
+
+.action-cta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.58rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  transition: all 0.15s;
+  white-space: nowrap;
+  background: transparent;
+}
+
+.cta-high { border-color: rgba(255,107,53,0.3); color: var(--surge); }
+.cta-high:hover { background: var(--surge-dim); }
+.cta-med { border-color: rgba(245,197,24,0.3); color: var(--gold); }
+.cta-med:hover { background: var(--gold-dim); }
+.cta-low { border-color: rgba(59,158,255,0.2); color: var(--blue); }
+.cta-low:hover { background: var(--blue-dim); }
+
+.trend-up { color: var(--green); font-size: 0.7rem; }
+.trend-dn { color: var(--red); font-size: 0.7rem; }
+.trend-flat { color: var(--muted); font-size: 0.7rem; }
+
+/* Topics column */
+.topic-mini {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.58rem;
+  padding: 0.18rem 0.5rem;
+  border-radius: 4px;
+  background: var(--blue-dim);
+  color: var(--blue);
+  border: 1px solid rgba(59,158,255,0.15);
+  display: inline-block;
+  margin: 0.1rem;
+  white-space: nowrap;
+}
+
+.topic-mini.t-surge {
+  background: var(--surge-dim);
+  color: var(--surge);
+  border-color: rgba(255,107,53,0.15);
+}
+
+/* ── DASHBOARD SECTION ── */
+.dashboard { padding: 2rem; }
+
+.dash-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 1rem;
+  max-width: 1300px;
+  margin: 0 auto 1.25rem;
+  animation: fadeUp 0.4s ease both;
+}
+
+@media(max-width:900px){ .dash-grid{ grid-template-columns: 1fr 1fr; } }
+
+.kpi-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.kpi-card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+}
+
+.kpi-card.k-surge::after { background: var(--surge); }
+.kpi-card.k-gold::after { background: var(--gold); }
+.kpi-card.k-blue::after { background: var(--blue); }
+.kpi-card.k-green::after { background: var(--green); }
+
+.kpi-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.5rem;
+}
+
+.kpi-value {
+  font-family: 'Fraunces', serif;
+  font-size: 2.4rem;
+  font-weight: 900;
+  line-height: 1;
+  margin-bottom: 0.3rem;
+}
+
+.kpi-card.k-surge .kpi-value { color: var(--surge); }
+.kpi-card.k-gold .kpi-value { color: var(--gold); }
+.kpi-card.k-blue .kpi-value { color: var(--blue); }
+.kpi-card.k-green .kpi-value { color: var(--green); }
+
+.kpi-sub { font-size: 0.65rem; color: var(--muted); }
+
+/* Dash main grid */
+.dash-main {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 1.25rem;
+  max-width: 1300px;
+  margin: 0 auto 1.25rem;
+}
+
+@media(max-width:900px){ .dash-main{ grid-template-columns:1fr; } }
+
+.dash-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  animation: fadeUp 0.4s 0.05s ease both;
+}
+
+.dash-card-header {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dash-card-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.dash-card-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.58rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  background: var(--surge-dim);
+  color: var(--surge);
+  border: 1px solid rgba(255,107,53,0.2);
+}
+
+.dash-card-body { padding: 1.25rem 1.5rem; }
+
+/* Hot accounts list */
+.hot-account {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(30,42,56,0.7);
+  cursor: pointer;
+  transition: background 0.15s;
+  border-radius: 6px;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+
+.hot-account:last-child { border-bottom: none; }
+.hot-account:hover { background: rgba(255,107,53,0.04); }
+
+.ha-rank {
+  font-family: 'Fraunces', serif;
+  font-size: 1rem;
+  font-weight: 900;
+  color: var(--border2);
+  width: 20px;
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.ha-logo {
+  width: 34px; height: 34px;
+  border-radius: 8px;
+  background: var(--border2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.ha-info { flex: 1; min-width: 0; }
+.ha-name { font-size: 0.82rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ha-topic { font-size: 0.68rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.ha-score {
+  font-family: 'Fraunces', serif;
+  font-size: 1.1rem;
+  font-weight: 900;
+  flex-shrink: 0;
+}
+
+/* Bar chart */
+.bar-chart { padding: 0.5rem 0; }
+
+.bar-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.8rem;
+}
+
+.bar-label {
+  font-size: 0.72rem;
+  width: 130px;
+  flex-shrink: 0;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bar-track {
+  flex: 1;
+  height: 7px;
+  background: var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 4px;
+}
+
+.bar-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  color: var(--muted);
+  width: 24px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* Surge trend chart (CSS-based) */
+.trend-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 60px;
+  padding: 0.5rem 0;
+}
+
+.trend-bar {
+  flex: 1;
+  border-radius: 3px 3px 0 0;
+  min-height: 4px;
+  transition: height 0.8s ease;
+  cursor: pointer;
+  position: relative;
+}
+
+.trend-bar:hover::after {
+  content: attr(data-val);
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--card);
+  border: 1px solid var(--border);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.55rem;
+  white-space: nowrap;
+  color: var(--text);
+}
+
+/* Action queue */
+.action-queue { display: flex; flex-direction: column; gap: 0.6rem; }
+
+.aq-item {
+  background: var(--deep);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  transition: border-color 0.15s;
+  cursor: pointer;
+}
+
+.aq-item:hover { border-color: var(--border2); }
+
+.aq-icon {
+  width: 30px; height: 30px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.aq-info { flex: 1; }
+.aq-title { font-size: 0.78rem; font-weight: 600; margin-bottom: 0.15rem; }
+.aq-sub { font-size: 0.65rem; color: var(--muted); line-height: 1.4; }
+
+.aq-time {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.55rem;
+  color: var(--muted2);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* Source donut (CSS) */
+.source-legend { display: flex; flex-direction: column; gap: 0.75rem; }
+
+.src-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.src-dot {
+  width: 10px; height: 10px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.src-label { font-size: 0.78rem; flex: 1; }
+.src-count { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--muted); }
+
+.src-bar-wrap { width: 60px; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.src-bar-fill { height: 100%; border-radius: 2px; }
+
+/* Donut chart visual */
+.donut-wrap {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.donut-svg { flex-shrink: 0; }
+
+/* Bottom 3-col */
+.dash-bottom {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1.25rem;
+  max-width: 1300px;
+  margin: 0 auto;
+}
+
+@media(max-width:900px){ .dash-bottom{ grid-template-columns:1fr; } }
+
+/* Intent flow */
+.intent-funnel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+}
+
+.funnel-stage {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.f-bar-wrap { flex: 1; position: relative; }
+
+.f-bar {
+  height: 34px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  padding-left: 0.75rem;
+  font-size: 0.72rem;
+  font-weight: 500;
+  transition: width 1s ease;
+}
+
+.f-label { width: 65px; font-size: 0.68rem; color: var(--muted); flex-shrink: 0; }
+.f-count { width: 30px; font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: var(--muted); text-align: right; flex-shrink: 0; }
+
+/* Tab switching the sections */
+.nav-tab[data-target="explainer"].active { color: var(--surge); border-bottom-color: var(--surge); }
+.nav-tab[data-target="data"].active { color: var(--blue); border-bottom-color: var(--blue); }
+.nav-tab[data-target="dashboard"].active { color: var(--green); border-bottom-color: var(--green); }
+
+/* Info rows in explainer */
+.info-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  margin: 1.5rem 0;
+}
+
+@media(max-width:700px){ .info-row{ grid-template-columns:1fr; } }
+
+.info-box {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.info-box h4 {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.info-box ul { list-style: none; }
+.info-box ul li {
+  font-size: 0.78rem;
+  color: var(--muted);
+  padding: 0.35rem 0;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  line-height: 1.5;
+}
+
+.info-box ul li:last-child { border: none; }
+.info-box ul li::before { content: '◆'; font-size: 0.4rem; color: var(--surge); margin-top: 5px; flex-shrink: 0; }
+
+/* Animations */
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(14px); }
+  to { opacity:1; transform:translateY(0); }
+}
+
+@keyframes blink {
+  0%,100% { opacity:1; }
+  50% { opacity:0.4; }
+}
+
+.delay-1 { animation-delay: 0.08s; }
+.delay-2 { animation-delay: 0.16s; }
+.delay-3 { animation-delay: 0.24s; }
+.delay-4 { animation-delay: 0.32s; }
+
+/* View toggle */
+#sales-view, #marketing-view { display: none; }
+#sales-view.active, #marketing-view.active { display: block; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-logo">Younion</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" data-target="explainer" onclick="switchSection(this,'explainer')">📖 How It Works</button>
+    <button class="nav-tab" data-target="data" onclick="switchSection(this,'data')">📊 Bombora Sample Data</button>
+    <button class="nav-tab" data-target="dashboard" onclick="switchSection(this,'dashboard')">🎯 Live Dashboard</button>
+  </div>
+  <div class="nav-right">
+    <div class="live-pill"><div class="live-dot"></div>3rd Party Engine</div>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════
+     SECTION 1 : EXPLAINER
+════════════════════════════════════════════ -->
+<div id="explainer" class="section active">
+<div class="explainer">
+
+  <div class="ex-hero">
+    <div class="tag">3rd Party B2B Intent Signal Engine · Younion</div>
+    <h1>Find companies<br>ready to buy — <em>before</em><br>they call you</h1>
+    <p>3rd party intent data tells you which companies are actively researching event management, brand activation, and experiential marketing — right now, across thousands of websites — even if they've never visited younion.live.</p>
+  </div>
+
+  <!-- How it works flow -->
+  <div class="how-flow">
+    <div class="flow-step">
+      <span class="flow-icon">🌐</span>
+      <div class="flow-num">01</div>
+      <h4>Data Collection</h4>
+      <p>Bombora tracks content consumption across 5,000+ B2B media sites, forums, and review platforms.</p>
+    </div>
+    <div class="flow-step">
+      <span class="flow-icon">📡</span>
+      <div class="flow-num">02</div>
+      <h4>Topic Matching</h4>
+      <p>When a company's employees repeatedly consume content around your topics, Bombora registers a "surge".</p>
+    </div>
+    <div class="flow-step">
+      <span class="flow-icon">🧮</span>
+      <div class="flow-num">03</div>
+      <h4>Score Calculation</h4>
+      <p>Surge score (0–100) is assigned. Above baseline = they're researching. High surge = they're about to buy.</p>
+    </div>
+    <div class="flow-step">
+      <span class="flow-icon">⚡</span>
+      <div class="flow-num">04</div>
+      <h4>Action Trigger</h4>
+      <p>Signals flow into your CRM. Sales gets alerted. SDR reaches out. Marketing retargets. You close faster.</p>
+    </div>
+  </div>
+
+  <!-- What is Bombora -->
+  <div class="bombora-card">
+    <div>
+      <h3>What is Bombora &amp; how does it work?</h3>
+      <p>Bombora is the leading B2B intent data cooperative. It aggregates anonymous behavioural data from a network of 5,000+ premium B2B websites (think: industry publications, tech review sites, event forums). When employees at a target company consume content about a specific topic — say "event management" or "brand activation" — Bombora records this and calculates a surge score compared to that company's normal baseline.</p>
+      <p>The key insight: <strong style="color:var(--text)">companies don't buy alone</strong>. Multiple employees research before a purchase. When you see a company with a surge score of 75+ on "experiential marketing", it means their team has been reading about it intensively — that's a buying signal.</p>
+      <div class="topic-chips">
+        <span class="chip chip-surge">Experiential Marketing</span>
+        <span class="chip chip-surge">B2B Event Management</span>
+        <span class="chip chip-surge">Brand Activation</span>
+        <span class="chip chip-blue">Corporate Events</span>
+        <span class="chip chip-blue">Marketing Agency</span>
+        <span class="chip chip-gold">Trade Show Management</span>
+        <span class="chip chip-gold">Brand Experience</span>
+        <span class="chip chip-muted">Digital Marketing</span>
+      </div>
+      <p style="font-size:0.75rem; margin-top:0.5rem;">↑ These are the Bombora topics Younion should track</p>
+    </div>
+    <div class="bombora-stat-row">
+      <div class="b-stat">
+        <div class="b-stat-num">5K+</div>
+        <div class="b-stat-label">Premium B2B websites<br>in Bombora co-op</div>
+      </div>
+      <div class="b-stat">
+        <div class="b-stat-num">4M+</div>
+        <div class="b-stat-label">Business domains<br>tracked globally</div>
+      </div>
+      <div class="b-stat">
+        <div class="b-stat-num">12K+</div>
+        <div class="b-stat-label">Topics available<br>to track</div>
+      </div>
+      <div class="b-stat">
+        <div class="b-stat-num">Weekly</div>
+        <div class="b-stat-label">Signal refresh<br>cadence</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Signal Anatomy -->
+  <div class="signal-anatomy">
+    <div class="anatomy-header">
+      <span style="font-size:1.1rem;">🔬</span>
+      <h3>Anatomy of a Bombora Intent Signal — What Each Field Means</h3>
+    </div>
+    <div class="anatomy-body">
+      <div class="signal-field-grid">
+        <div class="sig-field">
+          <div class="sig-field-key">company_name</div>
+          <div class="sig-field-val">Hindustan Unilever Ltd</div>
+          <div class="sig-field-desc">The company showing intent. Identified by domain matching across Bombora's network.</div>
+        </div>
+        <div class="sig-field">
+          <div class="sig-field-key">domain</div>
+          <div class="sig-field-val">hul.co.in</div>
+          <div class="sig-field-desc">Company domain. Used to match against your Target Account List (TAL) in CRM.</div>
+        </div>
+        <div class="sig-field">
+          <div class="sig-field-key">surge_score</div>
+          <div class="sig-field-val" style="color:var(--surge)">82 / 100</div>
+          <div class="sig-field-desc">How much above their baseline they're consuming content. 60+ = significant surge. 80+ = high urgency.</div>
+        </div>
+        <div class="sig-field">
+          <div class="sig-field-key">intent_topics</div>
+          <div class="sig-field-val">Experiential Marketing, Brand Activation</div>
+          <div class="sig-field-desc">Specific topics driving the surge. Maps to Younion's service offerings.</div>
+        </div>
+        <div class="sig-field">
+          <div class="sig-field-key">weeks_surging</div>
+          <div class="sig-field-val" style="color:var(--gold)">3 weeks</div>
+          <div class="sig-field-desc">How long the surge has been active. 3+ weeks = sustained research = higher purchase probability.</div>
+        </div>
+        <div class="sig-field">
+          <div class="sig-field-key">employee_count</div>
+          <div class="sig-field-val">18,000+</div>
+          <div class="sig-field-desc">Company size. Helps prioritise — larger companies = larger deal size for Younion.</div>
+        </div>
+        <div class="sig-field">
+          <div class="sig-field-key">industry</div>
+          <div class="sig-field-val">FMCG / Consumer Goods</div>
+          <div class="sig-field-desc">Industry vertical. Cross-reference with Younion's ICP to confirm fit.</div>
+        </div>
+        <div class="sig-field">
+          <div class="sig-field-key">hq_location</div>
+          <div class="sig-field-val">Mumbai, India</div>
+          <div class="sig-field-desc">Company HQ. For Younion's India focus, prioritise Mumbai, Delhi, Bangalore, Chennai accounts.</div>
+        </div>
+        <div class="sig-field">
+          <div class="sig-field-key">signal_date</div>
+          <div class="sig-field-val">2025-01-20</div>
+          <div class="sig-field-desc">When the signal was detected. Signals older than 30 days lose urgency — act within 7 days of signal.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step by step implementation -->
+  <h2 style="font-family:'Fraunces',serif; font-size:1.8rem; font-weight:900; margin: 2.5rem 0 1.5rem; letter-spacing:-0.5px;">
+    Step-by-Step: Build the Engine
+  </h2>
+
+  <div class="step-cards">
+    <div class="step-card delay-1">
+      <div class="step-num-big">1</div>
+      <div>
+        <h4>Set Up Bombora (or Apollo.io as Free Alternative)</h4>
+        <p>Access Bombora directly at bombora.com or through HubSpot / Salesforce integrations. For a free start, use Apollo.io's intent feature which draws from a similar data co-op at no cost. Upload your Target Account List (200–500 company domains) and configure your intent topics.</p>
+        <ul class="action-list">
+          <li>Go to <strong>bombora.com</strong> → request demo → mention you're tracking "experiential marketing" and "B2B events" topics in India</li>
+          <li><strong>Alternative free start:</strong> apollo.io → Signals tab → Intent → Select your topics → upload domain list</li>
+          <li>Set up <strong>Surge™ topic alerts</strong> for: Experiential Marketing, Brand Activation, Event Management, Corporate Events, Marketing Agency Search</li>
+          <li>Configure <strong>weekly digest email</strong> so intent data lands in your inbox every Monday morning</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="step-card delay-2">
+      <div class="step-num-big">2</div>
+      <div>
+        <h4>Build &amp; Upload Your Target Account List (TAL)</h4>
+        <p>Bombora is only valuable if you point it at the right companies. Build a list of 200–500 Indian companies that match Younion's ICP: FMCG, BFSI, Pharma, Tech companies with marketing teams large enough to run brand campaigns.</p>
+        <ul class="action-list">
+          <li>Use <strong>LinkedIn Sales Navigator</strong> → filter by: Company Size 500+, Industry (FMCG/Pharma/BFSI/Tech), Location India → export 300 companies</li>
+          <li>Export as CSV with columns: <strong>Company Name, Domain, Industry, City, Employee Count</strong></li>
+          <li>Upload domain list to Bombora under <strong>"My Accounts"</strong> — this creates your watched account universe</li>
+          <li>Also upload to <strong>HubSpot CRM</strong> as a "Target Account" company list so intent data has a home to land in</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="step-card delay-3">
+      <div class="step-num-big">3</div>
+      <div>
+        <h4>Connect Bombora → CRM (HubSpot/Zoho/Salesforce)</h4>
+        <p>Intent signals are useless if your sales team has to log into Bombora to check them. Use native integrations or Zapier to automatically push signals into your CRM as soon as they're detected.</p>
+        <ul class="action-list">
+          <li><strong>HubSpot Integration:</strong> HubSpot App Marketplace → search "Bombora" → install → authenticate → map fields: Surge Score → Custom Property, Intent Topics → Notes</li>
+          <li>Create <strong>3 custom CRM properties:</strong> "Bombora Surge Score" (number), "Intent Topics" (multi-select), "Intent Level" (dropdown: High/Medium/Low)</li>
+          <li>Build a <strong>CRM workflow:</strong> IF Surge Score ≥ 60 → Set Intent Level = High → Create Task for SDR → Send Slack notification</li>
+          <li><strong>Zapier alternative:</strong> Bombora webhook → Zapier → HubSpot/Zoho CRM contact update (no code required)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="step-card delay-4">
+      <div class="step-num-big">4</div>
+      <div>
+        <h4>Define Scoring Rules &amp; Automate Actions</h4>
+        <p>Not every signal deserves equal attention. Score and route signals so your SDR knows exactly who to call today versus who goes into nurture.</p>
+        <ul class="action-list">
+          <li><strong>High Intent (Score 70–100):</strong> SDR calls within 24 hours → Personal email from founder/senior team → Add to LinkedIn outreach sequence</li>
+          <li><strong>Medium Intent (Score 40–69):</strong> Add to email nurture sequence → LinkedIn connection request + message → Retargeting ad shown</li>
+          <li><strong>Low Intent (Score 20–39):</strong> Add to newsletter → LinkedIn follow → No direct outreach yet</li>
+          <li>Set up <strong>Slack/WhatsApp alert:</strong> Daily 9am message: "🔥 3 new high-intent accounts from Bombora" with company name, score, and CRM link</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-num-big">5</div>
+      <div>
+        <h4>Write Intent-Based Outreach (Using the Signal)</h4>
+        <p>The biggest mistake SDRs make: getting a Bombora signal and sending a generic pitch. The signal gives you context — use it in your outreach to 3x your reply rate.</p>
+        <ul class="action-list">
+          <li><strong>Don't say:</strong> "Hi, I'm from Younion, we do events and brand experiences..."</li>
+          <li><strong>Do say:</strong> "Hi [Name], I noticed [Company] has been exploring experiential marketing options recently — we've helped similar FMCG brands like [X] create [specific result]. Would it make sense to connect?"</li>
+          <li>Build <strong>3 email templates</strong> per intent level in HubSpot Sequences — reference the intent topic without revealing that you have their data</li>
+          <li>For High Intent accounts, <strong>personalise every email</strong> with the company's recent news/campaigns before sending</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tools comparison -->
+  <div class="info-row">
+    <div class="info-box">
+      <h4>🛠️ 3rd Party Intent Tools for Younion</h4>
+      <ul>
+        <li><strong>Bombora</strong> — Industry standard, 5000+ sites. Best for India enterprise accounts. <span class="chip chip-surge" style="font-size:0.55rem;">Paid ~$1K/mo</span></li>
+        <li><strong>Apollo.io Intent</strong> — Free tier available, overlaps with Bombora co-op. Start here. <span class="chip chip-green" style="font-size:0.55rem;">Free to start</span></li>
+        <li><strong>G2 Buyer Intent</strong> — Shows who viewed your G2 profile/compared competitors. <span class="chip chip-blue" style="font-size:0.55rem;">Free + Paid</span></li>
+        <li><strong>ZoomInfo Intent</strong> — Strong for US/global accounts with India coverage growing. <span class="chip chip-gold" style="font-size:0.55rem;">Paid</span></li>
+        <li><strong>Clearbit Reveal</strong> — Identifies companies visiting younion.live via reverse IP. <span class="chip chip-blue" style="font-size:0.55rem;">Freemium</span></li>
+        <li><strong>TechTarget Priority Engine</strong> — Good for tech sector targets. <span class="chip chip-surge" style="font-size:0.55rem;">Paid</span></li>
+      </ul>
+    </div>
+    <div class="info-box">
+      <h4>⚠️ Common Mistakes to Avoid</h4>
+      <ul>
+        <li>Buying intent data without a <strong>Target Account List</strong> — you'll drown in irrelevant signals</li>
+        <li>Not connecting signals to CRM — SDR misses alerts, leads go cold</li>
+        <li><strong>Revealing you have intent data</strong> in outreach ("I see you've been researching...") — feels creepy, kills trust</li>
+        <li>Ignoring signal age — a 60-day-old signal is near worthless, act within <strong>7 days</strong></li>
+        <li>Using only one intent topic — track <strong>5–8 topics</strong> to catch all buyer journey stages</li>
+        <li>No <strong>score decay rule</strong> — accounts that went cold should drop out of high-intent view automatically</li>
+        <li>Sales and marketing working from different data — maintain <strong>one CRM as single source of truth</strong></li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SECTION 2 : SAMPLE DATA
+════════════════════════════════════════════ -->
+<div id="data" class="section">
+<div class="data-section">
+
+  <div class="section-header">
+    <div class="eyebrow">Bombora Sample Dataset · Younion TAL</div>
+    <h2>Simulated Weekly Intent Report</h2>
+    <p>This is what a real Bombora weekly export looks like for Younion's Target Account List. Each row is a company showing intent on your tracked topics. Sort, filter, and action directly from here.</p>
+  </div>
+
+  <div class="data-table-wrap">
+    <div class="table-toolbar">
+      <div class="toolbar-title">📡 20 accounts · Week of Jan 20, 2025 · Topics: Experiential Marketing, Brand Activation, Event Management</div>
+      <button class="filter-btn active" onclick="filterTable('all',this)">All (20)</button>
+      <button class="filter-btn" onclick="filterTable('high',this)">🔴 High (7)</button>
+      <button class="filter-btn" onclick="filterTable('med',this)">🟡 Medium (8)</button>
+      <button class="filter-btn" onclick="filterTable('low',this)">🔵 Low (5)</button>
+    </div>
+    <div class="data-table-scroll">
+      <table class="intent-table" id="intentTable">
+        <thead>
+          <tr>
+            <th>Company</th>
+            <th>Industry</th>
+            <th>Surge Score</th>
+            <th>Weeks Surging</th>
+            <th>Intent Topics</th>
+            <th>HQ</th>
+            <th>Employees</th>
+            <th>Intent Level</th>
+            <th>Trend</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Legend -->
+  <div style="display:flex; gap:2rem; margin-top:1.25rem; flex-wrap:wrap; padding:1rem 1.5rem; background:var(--card); border:1px solid var(--border); border-radius:10px;">
+    <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.72rem;color:var(--muted);">
+      <span class="intent-badge badge-high">🔴 High</span> Surge 70–100 · Immediate SDR outreach
+    </div>
+    <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.72rem;color:var(--muted);">
+      <span class="intent-badge badge-med">🟡 Medium</span> Surge 40–69 · Nurture + LinkedIn
+    </div>
+    <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.72rem;color:var(--muted);">
+      <span class="intent-badge badge-low">🔵 Low</span> Surge 20–39 · Newsletter + retargeting
+    </div>
+    <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.72rem;color:var(--muted);">
+      <span style="color:var(--surge);font-size:0.8rem;">▲</span> Score rising vs last week
+    </div>
+    <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.72rem;color:var(--muted);">
+      <span style="color:var(--red);font-size:0.8rem;">▼</span> Score falling — act before it decays
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SECTION 3 : DASHBOARD
+════════════════════════════════════════════ -->
+<div id="dashboard" class="section">
+<div class="dashboard">
+
+  <!-- View toggle -->
+  <div style="max-width:1300px; margin:0 auto 1.25rem; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem;">
+    <div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:0.3rem;">Live Intent Dashboard</div>
+      <div style="font-family:'Fraunces',serif;font-size:1.4rem;font-weight:900;letter-spacing:-0.5px;">3rd Party Signal Engine · Younion</div>
+    </div>
+    <div style="display:flex;gap:0.5rem;">
+      <button class="filter-btn active" onclick="switchView('sales',this)">🎯 Sales View</button>
+      <button class="filter-btn" onclick="switchView('marketing',this)">📣 Marketing View</button>
+    </div>
+  </div>
+
+  <!-- SALES VIEW -->
+  <div id="sales-view" class="active">
+
+    <!-- KPIs -->
+    <div class="dash-grid">
+      <div class="kpi-card k-surge" style="animation: fadeUp 0.4s ease both;">
+        <div class="kpi-label">High Intent Accounts</div>
+        <div class="kpi-value">7</div>
+        <div class="kpi-sub">Score 70+ · Call today</div>
+      </div>
+      <div class="kpi-card k-gold" style="animation: fadeUp 0.4s 0.07s ease both;">
+        <div class="kpi-label">SDR Queue (Medium)</div>
+        <div class="kpi-value">8</div>
+        <div class="kpi-sub">Score 40–69 · Nurture active</div>
+      </div>
+      <div class="kpi-card k-blue" style="animation: fadeUp 0.4s 0.14s ease both;">
+        <div class="kpi-label">Avg. Surge Score</div>
+        <div class="kpi-value">61</div>
+        <div class="kpi-sub">↑ +8 vs last week</div>
+      </div>
+      <div class="kpi-card k-green" style="animation: fadeUp 0.4s 0.21s ease both;">
+        <div class="kpi-label">New This Week</div>
+        <div class="kpi-value">5</div>
+        <div class="kpi-sub">Fresh surges detected</div>
+      </div>
+    </div>
+
+    <!-- Main row -->
+    <div class="dash-main">
+
+      <!-- Hot accounts -->
+      <div class="dash-card">
+        <div class="dash-card-header">
+          <div class="dash-card-title">🔥 Top Hot Accounts · Act Now</div>
+          <div class="dash-card-badge">7 HIGH INTENT</div>
+        </div>
+        <div class="dash-card-body">
+          <div id="hotAccountsList"></div>
+        </div>
+      </div>
+
+      <!-- Action queue -->
+      <div class="dash-card">
+        <div class="dash-card-header">
+          <div class="dash-card-title">⚡ SDR Action Queue</div>
+          <div class="dash-card-badge">TODAY</div>
+        </div>
+        <div class="dash-card-body">
+          <div class="action-queue">
+            <div class="aq-item">
+              <div class="aq-icon" style="background:var(--surge-dim);">📞</div>
+              <div class="aq-info">
+                <div class="aq-title">Call Hindustan Unilever</div>
+                <div class="aq-sub">Surge: 82 · Topic: Experiential Marketing · 3 weeks surging</div>
+              </div>
+              <div class="aq-time">NOW</div>
+            </div>
+            <div class="aq-item">
+              <div class="aq-icon" style="background:var(--surge-dim);">📧</div>
+              <div class="aq-info">
+                <div class="aq-title">Email Mahindra Group</div>
+                <div class="aq-sub">Surge: 78 · New signal · Send capabilities deck</div>
+              </div>
+              <div class="aq-time">TODAY</div>
+            </div>
+            <div class="aq-item">
+              <div class="aq-icon" style="background:var(--surge-dim);">💼</div>
+              <div class="aq-info">
+                <div class="aq-title">LinkedIn OutReach — HDFC Bank</div>
+                <div class="aq-sub">Surge: 74 · Brand Activation · Connect with CMO</div>
+              </div>
+              <div class="aq-time">TODAY</div>
+            </div>
+            <div class="aq-item">
+              <div class="aq-icon" style="background:var(--gold-dim);">📩</div>
+              <div class="aq-info">
+                <div class="aq-title">Nurture Sequence — Wipro</div>
+                <div class="aq-sub">Surge: 65 · Enroll in 5-email nurture sequence</div>
+              </div>
+              <div class="aq-time">THIS WEEK</div>
+            </div>
+            <div class="aq-item">
+              <div class="aq-icon" style="background:var(--gold-dim);">🎯</div>
+              <div class="aq-info">
+                <div class="aq-title">Retarget — Bajaj Finance</div>
+                <div class="aq-sub">Surge: 58 · Launch LinkedIn retargeting campaign</div>
+              </div>
+              <div class="aq-time">THIS WEEK</div>
+            </div>
+            <div class="aq-item">
+              <div class="aq-icon" style="background:var(--blue-dim);">📰</div>
+              <div class="aq-info">
+                <div class="aq-title">Newsletter — Tata Chemicals</div>
+                <div class="aq-sub">Surge: 35 · Add to monthly newsletter list</div>
+              </div>
+              <div class="aq-time">NEXT WEEK</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom row -->
+    <div class="dash-bottom">
+
+      <!-- Surge trend -->
+      <div class="dash-card">
+        <div class="dash-card-header">
+          <div class="dash-card-title">📈 Weekly Surge Trend (Last 8 Weeks)</div>
+        </div>
+        <div class="dash-card-body">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:0.58rem;color:var(--muted);margin-bottom:0.5rem;letter-spacing:0.08em;">HIGH INTENT ACCOUNT COUNT</div>
+          <div class="trend-chart" id="trendChart"></div>
+          <div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:0.55rem;color:var(--muted2);margin-top:0.3rem;">
+            <span>Nov W3</span><span>Nov W4</span><span>Dec W1</span><span>Dec W2</span><span>Dec W3</span><span>Dec W4</span><span>Jan W1</span><span>Jan W2</span>
+          </div>
+          <div style="margin-top:1.25rem;">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:0.58rem;color:var(--muted);margin-bottom:0.75rem;letter-spacing:0.08em;">TOP SURGING TOPICS THIS WEEK</div>
+            <div class="bar-chart" id="topicBarChart"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Intent funnel -->
+      <div class="dash-card">
+        <div class="dash-card-header">
+          <div class="dash-card-title">🔽 Intent Funnel · TAL Breakdown</div>
+        </div>
+        <div class="dash-card-body">
+          <div class="intent-funnel">
+            <div class="funnel-stage">
+              <div class="f-label">TAL Total</div>
+              <div class="f-bar-wrap">
+                <div class="f-bar" style="width:100%;background:rgba(90,112,128,0.15);color:var(--muted);">300 accounts</div>
+              </div>
+              <div class="f-count">300</div>
+            </div>
+            <div style="text-align:center;font-size:0.7rem;color:var(--muted2);margin:-0.2rem 0;">↓</div>
+            <div class="funnel-stage">
+              <div class="f-label">Showing Intent</div>
+              <div class="f-bar-wrap">
+                <div class="f-bar" style="width:67%;background:rgba(59,158,255,0.12);color:var(--blue);">20 surging</div>
+              </div>
+              <div class="f-count">20</div>
+            </div>
+            <div style="text-align:center;font-size:0.7rem;color:var(--muted2);margin:-0.2rem 0;">↓</div>
+            <div class="funnel-stage">
+              <div class="f-label">Medium Intent</div>
+              <div class="f-bar-wrap">
+                <div class="f-bar" style="width:44%;background:var(--gold-dim);color:var(--gold);">8 accounts (40–69)</div>
+              </div>
+              <div class="f-count">8</div>
+            </div>
+            <div style="text-align:center;font-size:0.7rem;color:var(--muted2);margin:-0.2rem 0;">↓</div>
+            <div class="funnel-stage">
+              <div class="f-label">High Intent</div>
+              <div class="f-bar-wrap">
+                <div class="f-bar" style="width:28%;background:var(--surge-dim);color:var(--surge);">7 accounts (70+)</div>
+              </div>
+              <div class="f-count">7</div>
+            </div>
+            <div style="text-align:center;font-size:0.7rem;color:var(--muted2);margin:-0.2rem 0;">↓</div>
+            <div class="funnel-stage">
+              <div class="f-label">SDR Contacted</div>
+              <div class="f-bar-wrap">
+                <div class="f-bar" style="width:16%;background:var(--green-dim);color:var(--green);">3 reached out</div>
+              </div>
+              <div class="f-count">3</div>
+            </div>
+          </div>
+          <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);font-size:0.72rem;color:var(--muted);">
+            ⚠️ <strong style="color:var(--gold)">4 High Intent accounts</strong> not yet contacted. SDR action required today.
+          </div>
+        </div>
+      </div>
+
+      <!-- Intent by industry -->
+      <div class="dash-card">
+        <div class="dash-card-header">
+          <div class="dash-card-title">🏭 Intent by Industry</div>
+        </div>
+        <div class="dash-card-body">
+          <div class="bar-chart">
+            <div class="bar-row">
+              <div class="bar-label">FMCG</div>
+              <div class="bar-track"><div class="bar-fill" style="width:85%;background:var(--surge);"></div></div>
+              <div class="bar-val" style="color:var(--surge);">6</div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-label">BFSI</div>
+              <div class="bar-track"><div class="bar-fill" style="width:57%;background:var(--gold);"></div></div>
+              <div class="bar-val" style="color:var(--gold);">4</div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-label">Technology</div>
+              <div class="bar-track"><div class="bar-fill" style="width:57%;background:var(--blue);"></div></div>
+              <div class="bar-val" style="color:var(--blue);">4</div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-label">Pharma</div>
+              <div class="bar-track"><div class="bar-fill" style="width:43%;background:var(--green);"></div></div>
+              <div class="bar-val" style="color:var(--green);">3</div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-label">Automotive</div>
+              <div class="bar-track"><div class="bar-fill" style="width:28%;background:var(--muted);"></div></div>
+              <div class="bar-val">2</div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-label">E-Commerce</div>
+              <div class="bar-track"><div class="bar-fill" style="width:14%;background:var(--muted2);"></div></div>
+              <div class="bar-val">1</div>
+            </div>
+          </div>
+          <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:0.58rem;color:var(--muted);letter-spacing:0.1em;margin-bottom:0.5rem;">CONVERSION INSIGHT</div>
+            <div style="font-size:0.75rem;color:var(--muted);line-height:1.6;">FMCG leads the surge this week — aligns with Q1 campaign planning season. <span style="color:var(--surge);">Prioritise HUL, Nestlé, and ITC</span> outreach immediately.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /sales-view -->
+
+  <!-- MARKETING VIEW -->
+  <div id="marketing-view">
+
+    <div class="dash-grid">
+      <div class="kpi-card k-surge">
+        <div class="kpi-label">Campaign → High Intent %</div>
+        <div class="kpi-value">35%</div>
+        <div class="kpi-sub">FMCG campaigns best</div>
+      </div>
+      <div class="kpi-card k-blue">
+        <div class="kpi-label">Retargeting Audience</div>
+        <div class="kpi-value">13</div>
+        <div class="kpi-sub">Med+Low intent accounts</div>
+      </div>
+      <div class="kpi-card k-gold">
+        <div class="kpi-label">Nurture Enrolled</div>
+        <div class="kpi-value">8</div>
+        <div class="kpi-sub">Medium intent this week</div>
+      </div>
+      <div class="kpi-card k-green">
+        <div class="kpi-label">Intent Coverage</div>
+        <div class="kpi-value">6.7%</div>
+        <div class="kpi-sub">20 of 300 TAL surging</div>
+      </div>
+    </div>
+
+    <div class="dash-main">
+      <div class="dash-card">
+        <div class="dash-card-header">
+          <div class="dash-card-title">📣 Topic Surge Heatmap · This Week vs Last Week</div>
+        </div>
+        <div class="dash-card-body">
+          <div class="bar-chart">
+            <div class="bar-row">
+              <div class="bar-label">Experiential Mktg</div>
+              <div class="bar-track"><div class="bar-fill" style="width:90%;background:var(--surge);"></div></div>
+              <div class="bar-val" style="color:var(--surge);">18</div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-label">Brand Activation</div>
+              <div class="bar-track"><div class="bar-fill" style="width:75%;background:var(--surge);"></div></div>
+              <div class="bar-val" style="color:var(--surge);">15</div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-label">Event Management</div>
+              <div class="bar-track"><div class="bar-fill" style="width:65%;background:var(--gold);"></div></div>
+              <div class="bar-val" style="color:var(--gold);">13</div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-label">Corporate Events</div>
+              <div class="bar-track"><div class="bar-fill" style="width:55%;background:var(--gold);"></div></div>
+              <div class="bar-val" style="color:var(--gold);">11</div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-label">Marketing Agency</div>
+              <div class="bar-track"><div class="bar-fill" style="width:40%;background:var(--blue);"></div></div>
+              <div class="bar-val" style="color:var(--blue);">8</div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-label">Trade Shows</div>
+              <div class="bar-track"><div class="bar-fill" style="width:30%;background:var(--blue);"></div></div>
+              <div class="bar-val" style="color:var(--blue);">6</div>
+            </div>
+          </div>
+          <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);font-size:0.75rem;color:var(--muted);line-height:1.6;">
+            💡 <span style="color:var(--green);">"Experiential Marketing"</span> and <span style="color:var(--green);">"Brand Activation"</span> are surging highest this week. Create LinkedIn content around these topics NOW to capitalise on active buyer research.
+          </div>
+        </div>
+      </div>
+
+      <div class="dash-card">
+        <div class="dash-card-header">
+          <div class="dash-card-title">🎯 Recommended Marketing Actions</div>
+        </div>
+        <div class="dash-card-body">
+          <div class="action-queue">
+            <div class="aq-item">
+              <div class="aq-icon" style="background:var(--surge-dim);">📝</div>
+              <div class="aq-info">
+                <div class="aq-title">Post: Experiential Marketing Case Study</div>
+                <div class="aq-sub">18 accounts surging on this topic — your content will hit their research radar</div>
+              </div>
+              <div class="aq-time">TODAY</div>
+            </div>
+            <div class="aq-item">
+              <div class="aq-icon" style="background:var(--gold-dim);">💰</div>
+              <div class="aq-info">
+                <div class="aq-title">Launch LinkedIn Retargeting — 13 accounts</div>
+                <div class="aq-sub">Medium + Low intent TAL accounts · ₹5,000/week budget</div>
+              </div>
+              <div class="aq-time">THIS WEEK</div>
+            </div>
+            <div class="aq-item">
+              <div class="aq-icon" style="background:var(--blue-dim);">📧</div>
+              <div class="aq-info">
+                <div class="aq-title">Enroll 8 medium-intent in nurture sequence</div>
+                <div class="aq-sub">5-email sequence: FMCG brand activation case studies</div>
+              </div>
+              <div class="aq-time">TODAY</div>
+            </div>
+            <div class="aq-item">
+              <div class="aq-icon" style="background:var(--green-dim);">🎥</div>
+              <div class="aq-info">
+                <div class="aq-title">Create "Brand Activation ROI" content</div>
+                <div class="aq-sub">15 accounts surging — blog + LinkedIn carousel format</div>
+              </div>
+              <div class="aq-time">THIS WEEK</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /marketing-view -->
+
+</div>
+</div>
+
+<script>
+// ── DATA ──────────────────────────────────
+const accounts = [
+  { name:"Hindustan Unilever", domain:"hul.co.in", industry:"FMCG", surge:82, weeks:3, topics:["Experiential Marketing","Brand Activation"], city:"Mumbai", emp:"18,000+", level:"high", trend:"up", logo:"HUL", color:"#e67e22" },
+  { name:"Mahindra Group", domain:"mahindra.com", industry:"Automotive", surge:78, weeks:2, topics:["Brand Activation","Event Management"], city:"Mumbai", emp:"250,000+", level:"high", trend:"up", logo:"M&M", color:"#e74c3c" },
+  { name:"HDFC Bank", domain:"hdfcbank.com", industry:"BFSI", surge:74, weeks:4, topics:["Experiential Marketing","Corporate Events"], city:"Mumbai", emp:"177,000+", level:"high", trend:"flat", logo:"HDF", color:"#2980b9" },
+  { name:"Nestlé India", domain:"nestle.in", industry:"FMCG", surge:71, weeks:1, topics:["Brand Activation","Trade Shows"], city:"Gurugram", emp:"7,000+", level:"high", trend:"up", logo:"NST", color:"#27ae60" },
+  { name:"ITC Limited", domain:"itcportal.com", industry:"FMCG", surge:75, weeks:2, topics:["Experiential Marketing"], city:"Kolkata", emp:"26,000+", level:"high", trend:"up", logo:"ITC", color:"#8e44ad" },
+  { name:"Wipro Ltd", domain:"wipro.com", industry:"Technology", surge:65, weeks:3, topics:["Corporate Events","Marketing Agency"], city:"Bengaluru", emp:"250,000+", level:"high", trend:"flat", logo:"WIP", color:"#16a085" },
+  { name:"Bajaj Finance", domain:"bajajfinserv.in", industry:"BFSI", surge:72, weeks:1, topics:["Brand Activation","Experiential Marketing"], city:"Pune", emp:"55,000+", level:"high", trend:"up", logo:"BAJ", color:"#d35400" },
+  { name:"Infosys", domain:"infosys.com", industry:"Technology", surge:58, weeks:2, topics:["Corporate Events","Event Management"], city:"Bengaluru", emp:"300,000+", level:"med", trend:"up", logo:"INF", color:"#2c3e50" },
+  { name:"Asian Paints", domain:"asianpaints.com", industry:"FMCG", surge:55, weeks:3, topics:["Brand Activation"], city:"Mumbai", emp:"9,000+", level:"med", trend:"flat", logo:"AP", color:"#c0392b" },
+  { name:"Tata Motors", domain:"tatamotors.com", industry:"Automotive", surge:62, weeks:1, topics:["Experiential Marketing","Trade Shows"], city:"Mumbai", emp:"83,000+", level:"med", trend:"up", logo:"TM", color:"#1abc9c" },
+  { name:"Cipla Ltd", domain:"cipla.com", industry:"Pharma", surge:48, weeks:2, topics:["Event Management","Corporate Events"], city:"Mumbai", emp:"25,000+", level:"med", trend:"down", logo:"CPL", color:"#3498db" },
+  { name:"HCL Technologies", domain:"hcltech.com", industry:"Technology", surge:51, weeks:4, topics:["Marketing Agency","Event Management"], city:"Noida", emp:"225,000+", level:"med", trend:"flat", logo:"HCL", color:"#e74c3c" },
+  { name:"Godrej Consumer", domain:"godrejcp.com", industry:"FMCG", surge:44, weeks:1, topics:["Brand Activation"], city:"Mumbai", emp:"11,000+", level:"med", trend:"up", logo:"GCP", color:"#27ae60" },
+  { name:"SBI Life Insurance", domain:"sbilife.co.in", industry:"BFSI", surge:47, weeks:3, topics:["Corporate Events","Experiential Marketing"], city:"Mumbai", emp:"16,000+", level:"med", trend:"down", logo:"SBI", color:"#2980b9" },
+  { name:"Dr. Reddy's Labs", domain:"drreddys.com", industry:"Pharma", surge:42, weeks:1, topics:["Event Management"], city:"Hyderabad", emp:"24,000+", level:"med", trend:"up", logo:"DRL", color:"#e67e22" },
+  { name:"Flipkart", domain:"flipkart.com", industry:"E-Commerce", surge:38, weeks:2, topics:["Brand Activation","Trade Shows"], city:"Bengaluru", emp:"35,000+", level:"low", trend:"down", logo:"FLK", color:"#f39c12" },
+  { name:"Tata Chemicals", domain:"tatachemicals.com", industry:"FMCG", surge:35, weeks:1, topics:["Event Management"], city:"Mumbai", emp:"3,800+", level:"low", trend:"flat", logo:"TCL", color:"#8e44ad" },
+  { name:"Sun Pharma", domain:"sunpharma.com", industry:"Pharma", surge:28, weeks:2, topics:["Corporate Events"], city:"Mumbai", emp:"36,000+", level:"low", trend:"down", logo:"SUN", color:"#16a085" },
+  { name:"Piramal Group", domain:"piramal.com", industry:"Pharma", surge:32, weeks:1, topics:["Event Management","Marketing Agency"], city:"Mumbai", emp:"10,000+", level:"low", trend:"up", logo:"PGP", color:"#d35400" },
+  { name:"Mphasis Ltd", domain:"mphasis.com", industry:"Technology", surge:24, weeks:3, topics:["Corporate Events"], city:"Bengaluru", emp:"35,000+", level:"low", trend:"flat", logo:"MPH", color:"#2c3e50" },
+];
+
+// ── RENDER TABLE ──────────────────────────
+function renderTable(filter) {
+  const tbody = document.getElementById('tableBody');
+  const data = filter === 'all' ? accounts : accounts.filter(a => a.level === filter);
+  tbody.innerHTML = data.map(a => {
+    const scoreClass = a.level === 'high' ? 'sc-high' : a.level === 'med' ? 'sc-med' : 'sc-low';
+    const badgeClass = a.level === 'high' ? 'badge-high' : a.level === 'med' ? 'badge-med' : 'badge-low';
+    const badgeLabel = a.level === 'high' ? '🔴 HIGH' : a.level === 'med' ? '🟡 MEDIUM' : '🔵 LOW';
+    const ctaClass = a.level === 'high' ? 'cta-high' : a.level === 'med' ? 'cta-med' : 'cta-low';
+    const ctaLabel = a.level === 'high' ? 'CALL NOW' : a.level === 'med' ? 'NURTURE' : 'NEWSLETTER';
+    const trendIcon = a.trend === 'up' ? `<span class="trend-up">▲ Rising</span>` : a.trend === 'down' ? `<span class="trend-dn">▼ Falling</span>` : `<span class="trend-flat">— Stable</span>`;
+    const surgeColor = a.surge >= 70 ? 'var(--surge)' : a.surge >= 40 ? 'var(--gold)' : 'var(--blue)';
+    const surgeWidth = a.surge + '%';
+    const topics = a.topics.map(t => `<span class="topic-mini ${a.level === 'high' ? 't-surge' : ''}">${t}</span>`).join('');
+
+    return `<tr data-level="${a.level}">
+      <td>
+        <div class="company-cell">
+          <div class="company-logo" style="background:${a.color}22;color:${a.color};">${a.logo}</div>
+          <div>
+            <div class="company-name">${a.name}</div>
+            <div class="company-domain">${a.domain}</div>
+          </div>
+        </div>
+      </td>
+      <td style="color:var(--muted);font-size:0.75rem;">${a.industry}</td>
+      <td>
+        <div class="surge-meter">
+          <div class="surge-bar-bg"><div class="surge-bar-fill" style="width:${surgeWidth};background:${surgeColor};"></div></div>
+          <div class="surge-val" style="color:${surgeColor};">${a.surge}</div>
+        </div>
+      </td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--muted);">${a.weeks}w</td>
+      <td>${topics}</td>
+      <td style="font-size:0.75rem;color:var(--muted);">${a.city}</td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:var(--muted);">${a.emp}</td>
+      <td><span class="intent-badge ${badgeClass}">${badgeLabel}</span></td>
+      <td>${trendIcon}</td>
+      <td><button class="action-cta ${ctaClass}">${ctaLabel}</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function filterTable(f, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTable(f);
+}
+
+// ── HOT ACCOUNTS LIST ────────────────────
+function renderHotAccounts() {
+  const high = accounts.filter(a => a.level === 'high').slice(0,7);
+  const container = document.getElementById('hotAccountsList');
+  container.innerHTML = high.map((a,i) => `
+    <div class="hot-account">
+      <div class="ha-rank">${i+1}</div>
+      <div class="ha-logo" style="background:${a.color}22;color:${a.color};">${a.logo}</div>
+      <div class="ha-info">
+        <div class="ha-name">${a.name}</div>
+        <div class="ha-topic">${a.topics[0]} · ${a.city} · ${a.weeks}w surging</div>
+      </div>
+      <div class="ha-score" style="color:var(--surge);">${a.surge}</div>
+      <span class="intent-badge badge-high" style="font-size:0.55rem;">HOT</span>
+    </div>`).join('');
+}
+
+// ── TREND CHART ──────────────────────────
+function renderTrendChart() {
+  const vals = [2, 3, 4, 3, 5, 6, 5, 7];
+  const max = Math.max(...vals);
+  const chart = document.getElementById('trendChart');
+  chart.innerHTML = vals.map((v,i) => {
+    const h = Math.round((v/max)*100);
+    const isLast = i === vals.length - 1;
+    return `<div class="trend-bar" 
+      style="height:${h}%;background:${isLast ? 'var(--surge)' : 'rgba(255,107,53,0.3)'};" 
+      data-val="${v} accounts"></div>`;
+  }).join('');
+}
+
+// ── TOPIC BAR CHART ──────────────────────
+function renderTopicBars() {
+  const topics = [
+    { label:"Experiential Mktg", val:18, max:18 },
+    { label:"Brand Activation", val:15, max:18 },
+    { label:"Event Management", val:13, max:18 },
+    { label:"Corporate Events", val:11, max:18 },
+    { label:"Marketing Agency", val:8, max:18 },
+  ];
+  const chart = document.getElementById('topicBarChart');
+  chart.innerHTML = topics.map(t => {
+    const w = Math.round((t.val/t.max)*100);
+    return `<div class="bar-row">
+      <div class="bar-label">${t.label}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${w}%;background:var(--surge);"></div></div>
+      <div class="bar-val" style="color:var(--surge);">${t.val}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── NAV SECTION SWITCH ───────────────────
+function switchSection(btn, target) {
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(target).classList.add('active');
+}
+
+// ── DASHBOARD VIEW SWITCH ────────────────
+function switchView(v, btn) {
+  document.querySelectorAll('.dash-main .filter-btn, .dash-grid ~ .filter-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('sales-view').classList.remove('active');
+  document.getElementById('marketing-view').classList.remove('active');
+  btn.classList.add('active');
+  document.getElementById(v + '-view').classList.add('active');
+}
+
+// ── INIT ─────────────────────────────────
+renderTable('all');
+renderHotAccounts();
+renderTrendChart();
+renderTopicBars();
+</script>
+</body>
+</html>
