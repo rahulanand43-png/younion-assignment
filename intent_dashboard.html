@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Intent Intelligence Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --surface2: #1a2235;
+    --border: #1f2d45;
+    --high: #00e5a0;
+    --high-dim: rgba(0,229,160,0.12);
+    --mid: #f5b800;
+    --mid-dim: rgba(245,184,0,0.12);
+    --low: #4c9eff;
+    --low-dim: rgba(76,158,255,0.12);
+    --text: #e8edf5;
+    --text-muted: #6b7fa3;
+    --accent: #ff4d6d;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: 
+      linear-gradient(rgba(76,158,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(76,158,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  /* Header */
+  .header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .header-left h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2.8rem;
+    line-height: 1;
+    letter-spacing: -1px;
+    background: linear-gradient(135deg, var(--text) 0%, var(--low) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .header-left p {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 0.4rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .live-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 0.4rem 1rem;
+    font-size: 0.7rem;
+    color: var(--high);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .live-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--high);
+    animation: pulse 1.5s infinite;
+  }
+
+  /* Tab switcher */
+  .tabs {
+    display: flex;
+    gap: 0.25rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.25rem;
+    margin-bottom: 2rem;
+    width: fit-content;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+
+  .tab {
+    padding: 0.55rem 1.5rem;
+    border-radius: 7px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+
+  .tab.active {
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+
+  .tab:hover:not(.active) { color: var(--text); }
+
+  /* View panels */
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* KPI strip */
+  .kpi-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  @media(max-width:900px){ .kpi-strip{ grid-template-columns:repeat(2,1fr); } }
+
+  .kpi {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    position: relative;
+    overflow: hidden;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  .kpi::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+
+  .kpi.high::before { background: var(--high); }
+  .kpi.mid::before { background: var(--mid); }
+  .kpi.low::before { background: var(--low); }
+  .kpi.accent::before { background: var(--accent); }
+
+  .kpi-label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+  }
+
+  .kpi-value {
+    font-family: 'Syne', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .kpi.high .kpi-value { color: var(--high); }
+  .kpi.mid .kpi-value { color: var(--mid); }
+  .kpi.low .kpi-value { color: var(--low); }
+  .kpi.accent .kpi-value { color: var(--accent); }
+
+  .kpi-sub {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    margin-top: 0.3rem;
+  }
+
+  /* Grid layout */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  @media(max-width:900px){ .grid-2,.grid-3{ grid-template-columns:1fr; } }
+
+  /* Cards */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  .card-title {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--text-muted);
+    margin-bottom: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .card-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* Intent bars */
+  .intent-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .intent-label {
+    font-size: 0.72rem;
+    width: 120px;
+    flex-shrink: 0;
+  }
+
+  .intent-bar-wrap {
+    flex: 1;
+    background: var(--surface2);
+    border-radius: 4px;
+    height: 8px;
+    overflow: hidden;
+  }
+
+  .intent-bar {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 1.2s cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  .intent-count {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    width: 30px;
+    text-align: right;
+  }
+
+  /* Scoring table */
+  .score-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .score-table th {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    padding: 0 0 0.75rem 0;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .score-table td {
+    font-size: 0.75rem;
+    padding: 0.65rem 0;
+    border-bottom: 1px solid rgba(31,45,69,0.5);
+    vertical-align: middle;
+  }
+
+  .score-table tr:last-child td { border-bottom: none; }
+
+  .pts {
+    display: inline-block;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding: 0.2rem 0.5rem;
+    border-radius: 5px;
+  }
+
+  .pts-50 { background: var(--high-dim); color: var(--high); }
+  .pts-30 { background: var(--high-dim); color: var(--high); }
+  .pts-20 { background: var(--mid-dim); color: var(--mid); }
+  .pts-15 { background: var(--mid-dim); color: var(--mid); }
+  .pts-10 { background: var(--low-dim); color: var(--low); }
+  .pts-5 { background: rgba(107,127,163,0.12); color: var(--text-muted); }
+
+  /* Channel attribution */
+  .channel-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid rgba(31,45,69,0.5);
+  }
+
+  .channel-row:last-child { border-bottom: none; }
+
+  .channel-name { font-size: 0.75rem; flex: 1; }
+
+  .intent-badge {
+    font-size: 0.6rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 100px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 500;
+  }
+
+  .badge-high { background: var(--high-dim); color: var(--high); border: 1px solid rgba(0,229,160,0.3); }
+  .badge-mid { background: var(--mid-dim); color: var(--mid); border: 1px solid rgba(245,184,0,0.3); }
+  .badge-low { background: var(--low-dim); color: var(--low); border: 1px solid rgba(76,158,255,0.3); }
+
+  /* Action queue */
+  .action-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 0.9rem;
+    background: var(--surface2);
+    border-radius: 8px;
+    margin-bottom: 0.6rem;
+    border: 1px solid var(--border);
+    transition: border-color 0.2s;
+  }
+
+  .action-item:hover { border-color: rgba(76,158,255,0.3); }
+
+  .action-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+  }
+
+  .action-icon.high { background: var(--high-dim); }
+  .action-icon.mid { background: var(--mid-dim); }
+  .action-icon.low { background: var(--low-dim); }
+
+  .action-text { font-size: 0.73rem; line-height: 1.5; }
+  .action-text strong { color: var(--text); display: block; margin-bottom: 0.15rem; }
+  .action-text span { color: var(--text-muted); }
+
+  /* Signal tags */
+  .signal-group { margin-bottom: 1.2rem; }
+  .signal-group-label {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 0.6rem;
+  }
+
+  .signal-group-label.high { color: var(--high); }
+  .signal-group-label.mid { color: var(--mid); }
+  .signal-group-label.low { color: var(--low); }
+
+  .signal-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+
+  .tag {
+    font-size: 0.65rem;
+    padding: 0.25rem 0.65rem;
+    border-radius: 6px;
+    border: 1px solid;
+  }
+
+  .tag.high { border-color: rgba(0,229,160,0.3); color: var(--high); background: var(--high-dim); }
+  .tag.mid { border-color: rgba(245,184,0,0.3); color: var(--mid); background: var(--mid-dim); }
+  .tag.low { border-color: rgba(76,158,255,0.3); color: var(--low); background: var(--low-dim); }
+
+  /* Funnel visual */
+  .funnel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 1rem 0;
+  }
+
+  .funnel-stage {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+  }
+
+  .funnel-bar-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+  }
+
+  .funnel-bar {
+    height: 40px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    transition: width 1s ease;
+  }
+
+  .funnel-label {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    width: 100px;
+    text-align: right;
+  }
+
+  .funnel-count {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    width: 60px;
+  }
+
+  /* Arrow divider */
+  .funnel-arrow {
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--border);
+    margin: -0.1rem 0;
+  }
+
+  /* Automation steps */
+  .auto-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .step-num {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6rem;
+    color: var(--text-muted);
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .step-text { font-size: 0.73rem; line-height: 1.6; color: var(--text-muted); }
+  .step-text strong { color: var(--text); }
+
+  /* UTM table */
+  .utm-row {
+    display: flex;
+    gap: 1rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(31,45,69,0.5);
+    font-size: 0.72rem;
+    align-items: center;
+  }
+
+  .utm-row:last-child { border-bottom: none; }
+  .utm-key { color: var(--low); width: 120px; flex-shrink: 0; font-family: 'DM Mono', monospace; }
+  .utm-val { color: var(--text-muted); }
+
+  /* Animations */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes pulse {
+    0%,100% { opacity: 1; box-shadow: 0 0 0 0 rgba(0,229,160,0.4); }
+    50% { opacity: 0.7; box-shadow: 0 0 0 5px rgba(0,229,160,0); }
+  }
+
+  .anim-1 { animation-delay: 0.05s; }
+  .anim-2 { animation-delay: 0.1s; }
+  .anim-3 { animation-delay: 0.15s; }
+  .anim-4 { animation-delay: 0.2s; }
+
+  /* Section heading */
+  .section-heading {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--text-muted);
+    margin: 1.5rem 0 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .section-heading::before {
+    content: '';
+    width: 3px; height: 12px;
+    background: var(--low);
+    border-radius: 2px;
+  }
+
+  /* Score threshold indicator */
+  .threshold-bar {
+    display: flex;
+    height: 10px;
+    border-radius: 6px;
+    overflow: hidden;
+    margin: 0.5rem 0;
+    gap: 2px;
+  }
+
+  .threshold-seg {
+    height: 100%;
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .th-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.6rem;
+    color: var(--text-muted);
+    margin-top: 0.3rem;
+  }
+
+  .footer {
+    margin-top: 3rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.65rem;
+    color: var(--text-muted);
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <h1>Intent Intelligence</h1>
+      <p>Sales &amp; Marketing Unified Dashboard · Lead Scoring Framework</p>
+    </div>
+    <div style="display:flex; gap:0.75rem; align-items:center;">
+      <div class="live-badge"><div class="live-dot"></div>Live Pipeline</div>
+    </div>
+  </div>
+
+  <!-- Tab switcher -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('sales')">🎯 Sales View</button>
+    <button class="tab" onclick="switchTab('marketing')">📣 Marketing View</button>
+    <button class="tab" onclick="switchTab('framework')">⚙️ Framework</button>
+  </div>
+
+  <!-- ===== SALES VIEW ===== -->
+  <div id="sales" class="view active">
+
+    <div class="kpi-strip">
+      <div class="kpi high anim-1">
+        <div class="kpi-label">High Intent Leads Today</div>
+        <div class="kpi-value">24</div>
+        <div class="kpi-sub">Score ≥ 60 · Immediate Outreach</div>
+      </div>
+      <div class="kpi mid anim-2">
+        <div class="kpi-label">SDR Queue (Medium)</div>
+        <div class="kpi-value">61</div>
+        <div class="kpi-sub">Score 25–59 · Assign within 4hrs</div>
+      </div>
+      <div class="kpi low anim-3">
+        <div class="kpi-label">Nurture Pool (Low)</div>
+        <div class="kpi-value">138</div>
+        <div class="kpi-sub">Score &lt;25 · Marketing sequences</div>
+      </div>
+      <div class="kpi accent anim-4">
+        <div class="kpi-label">Avg. Time to First Touch</div>
+        <div class="kpi-value">1.4h</div>
+        <div class="kpi-sub">High Intent Target: &lt;24h</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+
+      <!-- Account Activity Timeline -->
+      <div class="card">
+        <div class="card-title">Hot Accounts · Activity Timeline</div>
+        
+        <div class="action-item">
+          <div class="action-icon high">🔥</div>
+          <div class="action-text">
+            <strong>Acme Corp — Score: 82</strong>
+            <span>Visited Pricing page → Requested Demo → 4 return visits this week</span>
+          </div>
+          <div class="intent-badge badge-high">High</div>
+        </div>
+
+        <div class="action-item">
+          <div class="action-icon high">⚡</div>
+          <div class="action-text">
+            <strong>TechNova Inc — Score: 74</strong>
+            <span>Demo request submitted → Sales email opened 3x → Replied to SDR</span>
+          </div>
+          <div class="intent-badge badge-high">High</div>
+        </div>
+
+        <div class="action-item">
+          <div class="action-icon mid">📊</div>
+          <div class="action-text">
+            <strong>BrightStar SaaS — Score: 45</strong>
+            <span>Whitepaper download → Product comparison page → Webinar signup</span>
+          </div>
+          <div class="intent-badge badge-mid">Medium</div>
+        </div>
+
+        <div class="action-item">
+          <div class="action-icon mid">📧</div>
+          <div class="action-text">
+            <strong>Orion Logistics — Score: 38</strong>
+            <span>Case study viewed → Newsletter signup → ROI calculator used</span>
+          </div>
+          <div class="intent-badge badge-mid">Medium</div>
+        </div>
+
+        <div class="action-item">
+          <div class="action-icon low">👁️</div>
+          <div class="action-text">
+            <strong>Unknown Visitor — Score: 15</strong>
+            <span>3 blog posts read · Organic search · First visit</span>
+          </div>
+          <div class="intent-badge badge-low">Low</div>
+        </div>
+      </div>
+
+      <!-- Automated Actions -->
+      <div class="card">
+        <div class="card-title">Automated Action Triggers</div>
+
+        <div class="section-heading">When Intent Score ≥ 60</div>
+
+        <div class="auto-step">
+          <div class="step-num">1</div>
+          <div class="step-text"><strong>Auto-create CRM Task</strong> — New lead record created in Salesforce / HubSpot / Zoho with intent score, source, and behavior log attached.</div>
+        </div>
+        <div class="auto-step">
+          <div class="step-num">2</div>
+          <div class="step-text"><strong>Notify Sales on Slack</strong> — Instant DM to assigned rep: company name, score, actions taken, and direct CRM link.</div>
+        </div>
+        <div class="auto-step">
+          <div class="step-num">3</div>
+          <div class="step-text"><strong>Assign Owner Automatically</strong> — Round-robin assignment to available SDR based on territory or vertical.</div>
+        </div>
+        <div class="auto-step">
+          <div class="step-num">4</div>
+          <div class="step-text"><strong>Send Demo Email</strong> — Personalized email sequence triggered within 30 min of high-intent detection.</div>
+        </div>
+
+        <div class="section-heading" style="margin-top:1.5rem;">Threshold Reference</div>
+        <div class="threshold-bar">
+          <div class="threshold-seg" style="width:25%;background:rgba(107,127,163,0.25);"></div>
+          <div class="threshold-seg" style="width:35%;background:var(--mid-dim);border:1px solid rgba(245,184,0,0.2);"></div>
+          <div class="threshold-seg" style="width:40%;background:var(--high-dim);border:1px solid rgba(0,229,160,0.2);"></div>
+        </div>
+        <div class="th-labels">
+          <span>0 — Low (&lt;25)</span>
+          <span>25 — Medium</span>
+          <span>60 — High</span>
+          <span>100</span>
+        </div>
+
+        <div class="section-heading" style="margin-top:1.5rem;">Intent Classification</div>
+        <table class="score-table">
+          <tr>
+            <th>Level</th><th>Score</th><th>Owner</th><th>Action</th>
+          </tr>
+          <tr>
+            <td><span class="intent-badge badge-high">🟢 High</span></td>
+            <td><span class="pts pts-50">60+</span></td>
+            <td>Sales</td>
+            <td style="color:var(--high)">Immediate outreach</td>
+          </tr>
+          <tr>
+            <td><span class="intent-badge badge-mid">🟡 Medium</span></td>
+            <td><span class="pts pts-20">25–59</span></td>
+            <td>SDR + Mktg</td>
+            <td style="color:var(--mid)">Nurture + follow-up</td>
+          </tr>
+          <tr>
+            <td><span class="intent-badge badge-low">🔵 Low</span></td>
+            <td><span class="pts pts-5">&lt;25</span></td>
+            <td>Marketing</td>
+            <td style="color:var(--low)">Educate</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- High intent signals for sales -->
+    <div class="card" style="margin-bottom:1rem;">
+      <div class="card-title">High Intent Signals — Sales Ready Triggers</div>
+      <div style="display:flex; gap:2rem; flex-wrap:wrap;">
+        <div>
+          <div class="signal-group-label high" style="font-size:0.6rem;text-transform:uppercase;letter-spacing:0.15em;margin-bottom:0.6rem;">Immediate Push to CRM</div>
+          <div class="signal-tags">
+            <span class="tag high">Visited Pricing Page</span>
+            <span class="tag high">Demo Request Submitted</span>
+            <span class="tag high">Trial Signup</span>
+            <span class="tag high">Contact Form Submitted</span>
+          </div>
+        </div>
+        <div>
+          <div class="signal-group-label mid" style="font-size:0.6rem;text-transform:uppercase;letter-spacing:0.15em;margin-bottom:0.6rem;">Assign to SDR</div>
+          <div class="signal-tags">
+            <span class="tag mid">Sales Email Opened 3x+</span>
+            <span class="tag mid">Email Reply Received</span>
+            <span class="tag mid">Product Comparison Page</span>
+            <span class="tag mid">Webinar Attended</span>
+          </div>
+        </div>
+        <div>
+          <div class="signal-group-label" style="font-size:0.6rem;text-transform:uppercase;letter-spacing:0.15em;margin-bottom:0.6rem;color:var(--text-muted);">Advanced Signals (Next Phase)</div>
+          <div class="signal-tags">
+            <span class="tag low">Reverse IP Lookup</span>
+            <span class="tag low">G2 / Capterra Intent</span>
+            <span class="tag low">Bombora Data</span>
+            <span class="tag low">LinkedIn Signals</span>
+            <span class="tag low">Predictive ML</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== MARKETING VIEW ===== -->
+  <div id="marketing" class="view">
+
+    <div class="kpi-strip">
+      <div class="kpi high anim-1">
+        <div class="kpi-label">High Intent Lead Rate</div>
+        <div class="kpi-value">11%</div>
+        <div class="kpi-sub">24 of 223 total leads</div>
+      </div>
+      <div class="kpi mid anim-2">
+        <div class="kpi-label">Campaign → High Intent %</div>
+        <div class="kpi-value">18%</div>
+        <div class="kpi-sub">Google Ads best performer</div>
+      </div>
+      <div class="kpi low anim-3">
+        <div class="kpi-label">Cost per High Intent Lead</div>
+        <div class="kpi-value">₹4.2K</div>
+        <div class="kpi-sub">Down 12% vs last month</div>
+      </div>
+      <div class="kpi accent anim-4">
+        <div class="kpi-label">Recent Intent Spikes</div>
+        <div class="kpi-value">+34%</div>
+        <div class="kpi-sub">Pricing page visits this week</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+
+      <!-- Leads by Intent Level -->
+      <div class="card">
+        <div class="card-title">Leads by Intent Level</div>
+        
+        <div class="intent-row">
+          <div class="intent-label">🟢 High Intent</div>
+          <div class="intent-bar-wrap">
+            <div class="intent-bar" style="width:0%;background:var(--high);" data-target="24"></div>
+          </div>
+          <div class="intent-count">24</div>
+        </div>
+        <div class="intent-row">
+          <div class="intent-label">🟡 Medium Intent</div>
+          <div class="intent-bar-wrap">
+            <div class="intent-bar" style="width:0%;background:var(--mid);" data-target="61"></div>
+          </div>
+          <div class="intent-count">61</div>
+        </div>
+        <div class="intent-row">
+          <div class="intent-label">🔵 Low Intent</div>
+          <div class="intent-bar-wrap">
+            <div class="intent-bar" style="width:0%;background:var(--low);" data-target="138"></div>
+          </div>
+          <div class="intent-count">138</div>
+        </div>
+
+        <div style="margin-top:1.5rem;">
+          <div class="card-title">Channel → Intent Quality</div>
+          
+          <div class="channel-row">
+            <div class="channel-name">Google Ads (CPC)</div>
+            <div class="intent-badge badge-high">High Quality</div>
+          </div>
+          <div class="channel-row">
+            <div class="channel-name">LinkedIn Ads</div>
+            <div class="intent-badge badge-mid">Medium Quality</div>
+          </div>
+          <div class="channel-row">
+            <div class="channel-name">Blog / SEO</div>
+            <div class="intent-badge badge-low">Low Quality</div>
+          </div>
+          <div class="channel-row">
+            <div class="channel-name">Webinar Registrations</div>
+            <div class="intent-badge badge-mid">Medium Quality</div>
+          </div>
+          <div class="channel-row">
+            <div class="channel-name">Referral / Direct</div>
+            <div class="intent-badge badge-high">High Quality</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Source attribution funnel -->
+      <div class="card">
+        <div class="card-title">Source Attribution · Buyer vs Browser</div>
+
+        <table class="score-table">
+          <tr>
+            <th>User</th><th>Source</th><th>Intent</th>
+          </tr>
+          <tr>
+            <td>User A</td>
+            <td><span style="color:var(--text-muted)">Google Ads</span></td>
+            <td><span class="intent-badge badge-high">High</span></td>
+          </tr>
+          <tr>
+            <td>User B</td>
+            <td><span style="color:var(--text-muted)">Blog SEO</span></td>
+            <td><span class="intent-badge badge-low">Low</span></td>
+          </tr>
+          <tr>
+            <td>User C</td>
+            <td><span style="color:var(--text-muted)">LinkedIn Ads</span></td>
+            <td><span class="intent-badge badge-mid">Medium</span></td>
+          </tr>
+        </table>
+
+        <div style="margin-top:1.5rem;">
+          <div class="card-title">UTM Capture Fields</div>
+          <div class="utm-row"><div class="utm-key">utm_source</div><div class="utm-val">Google / LinkedIn / Organic</div></div>
+          <div class="utm-row"><div class="utm-key">utm_medium</div><div class="utm-val">CPC / Organic / Email</div></div>
+          <div class="utm-row"><div class="utm-key">utm_campaign</div><div class="utm-val">Campaign name</div></div>
+          <div class="utm-row"><div class="utm-key">utm_content</div><div class="utm-val">Ad variation / Creative ID</div></div>
+        </div>
+
+        <div style="margin-top:1.5rem;">
+          <div class="card-title">GA4 Key Events to Track</div>
+          <div class="signal-tags">
+            <span class="tag high">view_pricing</span>
+            <span class="tag high">demo_request</span>
+            <span class="tag mid">download_whitepaper</span>
+            <span class="tag mid">trial_signup</span>
+            <span class="tag low">view_case_study</span>
+            <span class="tag low">return_visit</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Low intent signals for marketing -->
+    <div class="card">
+      <div class="card-title">Marketing Nurture Signals · Audience Building</div>
+      <div style="display:flex; gap:2rem; flex-wrap:wrap;">
+        <div>
+          <div class="signal-group-label low" style="font-size:0.6rem;text-transform:uppercase;letter-spacing:0.15em;margin-bottom:0.6rem;">Retargeting Audiences</div>
+          <div class="signal-tags">
+            <span class="tag low">Blog Readers</span>
+            <span class="tag low">Informational Keyword Visitors</span>
+            <span class="tag low">Social Media Engagers</span>
+            <span class="tag low">YouTube Viewers</span>
+            <span class="tag low">First Website Visit</span>
+          </div>
+        </div>
+        <div>
+          <div class="signal-group-label mid" style="font-size:0.6rem;text-transform:uppercase;letter-spacing:0.15em;margin-bottom:0.6rem;">Education Funnel</div>
+          <div class="signal-tags">
+            <span class="tag mid">Newsletter Subscriber</span>
+            <span class="tag mid">Whitepaper Download</span>
+            <span class="tag mid">Webinar Attendance</span>
+            <span class="tag mid">Returning Visitor (3+ sessions)</span>
+          </div>
+        </div>
+        <div>
+          <div class="signal-group-label high" style="font-size:0.6rem;text-transform:uppercase;letter-spacing:0.15em;margin-bottom:0.6rem;">SDR Handoff Ready</div>
+          <div class="signal-tags">
+            <span class="tag high">ROI Calculator Used</span>
+            <span class="tag high">Product Feature Pages</span>
+            <span class="tag high">Case Study + Return Visit</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== FRAMEWORK VIEW ===== -->
+  <div id="framework" class="view">
+
+    <div class="grid-2">
+
+      <!-- Scoring model -->
+      <div class="card">
+        <div class="card-title">Intent Scoring Model</div>
+        <table class="score-table">
+          <tr>
+            <th>Behavior / Signal</th><th>Points</th>
+          </tr>
+          <tr>
+            <td>Demo Request</td>
+            <td><span class="pts pts-50">+50</span></td>
+          </tr>
+          <tr>
+            <td>Pricing Page Visit</td>
+            <td><span class="pts pts-30">+30</span></td>
+          </tr>
+          <tr>
+            <td>Contact Form Submitted</td>
+            <td><span class="pts pts-20">+20</span></td>
+          </tr>
+          <tr>
+            <td>Case Study / Whitepaper</td>
+            <td><span class="pts pts-20">+20</span></td>
+          </tr>
+          <tr>
+            <td>Webinar Signup</td>
+            <td><span class="pts pts-15">+15</span></td>
+          </tr>
+          <tr>
+            <td>Email Click</td>
+            <td><span class="pts pts-10">+10</span></td>
+          </tr>
+          <tr>
+            <td>Returning Visit</td>
+            <td><span class="pts pts-10">+10</span></td>
+          </tr>
+          <tr>
+            <td>Email Open</td>
+            <td><span class="pts pts-5">+5</span></td>
+          </tr>
+          <tr>
+            <td>Blog Visit</td>
+            <td><span class="pts pts-5">+5</span></td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- Data sources -->
+      <div class="card">
+        <div class="card-title">Unified Intent Data Sources</div>
+
+        <div class="section-heading">Website Behavior</div>
+        <div class="signal-tags" style="margin-bottom:1rem;">
+          <span class="tag high">GA4</span>
+          <span class="tag high">Google Tag Manager</span>
+        </div>
+
+        <div class="section-heading">CRM Signals</div>
+        <div class="signal-tags" style="margin-bottom:1rem;">
+          <span class="tag mid">Salesforce</span>
+          <span class="tag mid">HubSpot</span>
+          <span class="tag mid">Zoho CRM</span>
+        </div>
+
+        <div class="section-heading">Marketing Automation</div>
+        <div class="signal-tags" style="margin-bottom:1rem;">
+          <span class="tag low">HubSpot</span>
+          <span class="tag low">Marketo</span>
+          <span class="tag low">Mailchimp</span>
+          <span class="tag low">Customer.io</span>
+        </div>
+
+        <div class="section-heading">Data Warehouse</div>
+        <div class="signal-tags" style="margin-bottom:1rem;">
+          <span class="tag low">BigQuery</span>
+          <span class="tag low">Snowflake</span>
+        </div>
+
+        <div class="section-heading">Advanced (Phase 2)</div>
+        <div class="signal-tags">
+          <span class="tag mid">Reverse IP Lookup</span>
+          <span class="tag mid">G2 / Capterra</span>
+          <span class="tag mid">Bombora</span>
+          <span class="tag mid">LinkedIn</span>
+          <span class="tag mid">Predictive ML</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Operational workflow -->
+    <div class="card">
+      <div class="card-title">Operational Workflow · Lead Flow</div>
+      <div class="funnel">
+        <div class="funnel-stage">
+          <div class="funnel-label">Lead enters website</div>
+          <div class="funnel-bar-container">
+            <div class="funnel-bar" style="width:90%;background:rgba(76,158,255,0.15);border:1px solid rgba(76,158,255,0.3);color:var(--low);">All Visitors (223)</div>
+          </div>
+          <div class="funnel-count"></div>
+        </div>
+        <div class="funnel-arrow">↓</div>
+        <div class="funnel-stage">
+          <div class="funnel-label">Intent Score calculated</div>
+          <div class="funnel-bar-container">
+            <div class="funnel-bar" style="width:70%;background:rgba(76,158,255,0.1);border:1px solid rgba(76,158,255,0.2);color:var(--low);">Scored Leads (199)</div>
+          </div>
+          <div class="funnel-count"></div>
+        </div>
+        <div class="funnel-arrow">↓</div>
+        <div class="funnel-stage">
+          <div class="funnel-label">High Intent → Sales Queue</div>
+          <div class="funnel-bar-container">
+            <div class="funnel-bar" style="width:40%;background:var(--high-dim);border:1px solid rgba(0,229,160,0.3);color:var(--high);">Sales Queue (24)</div>
+          </div>
+          <div class="funnel-count"></div>
+        </div>
+        <div class="funnel-arrow">↓</div>
+        <div class="funnel-stage">
+          <div class="funnel-label">Medium → SDR / Nurture</div>
+          <div class="funnel-bar-container">
+            <div class="funnel-bar" style="width:55%;background:var(--mid-dim);border:1px solid rgba(245,184,0,0.3);color:var(--mid);">SDR Outreach (61)</div>
+          </div>
+          <div class="funnel-count"></div>
+        </div>
+        <div class="funnel-arrow">↓</div>
+        <div class="funnel-stage">
+          <div class="funnel-label">Low → Marketing Funnel</div>
+          <div class="funnel-bar-container">
+            <div class="funnel-bar" style="width:65%;background:rgba(107,127,163,0.12);border:1px solid rgba(107,127,163,0.2);color:var(--text-muted);">Content + Retargeting (138)</div>
+          </div>
+          <div class="funnel-count"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    <span>Intent Segregation &amp; Unification Framework · v1.0</span>
+    <span>Data sources: GA4 + CRM + Marketing Automation → Data Warehouse</span>
+  </div>
+
+</div>
+
+<script>
+  function switchTab(tab) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById(tab).classList.add('active');
+    event.target.classList.add('active');
+    animateBars();
+  }
+
+  function animateBars() {
+    const max = 138;
+    document.querySelectorAll('.intent-bar[data-target]').forEach(bar => {
+      const target = parseInt(bar.dataset.target);
+      setTimeout(() => {
+        bar.style.width = (target / max * 100) + '%';
+      }, 100);
+    });
+  }
+
+  // Animate on load
+  window.addEventListener('load', () => {
+    setTimeout(animateBars, 400);
+  });
+</script>
+</body>
+</html>
