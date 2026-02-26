@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Younion · Intent Integration</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: #ffffff;
+  color: #111;
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem 5rem;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 0.3rem; }
+.sub { color: #888; font-size: 0.9rem; margin-bottom: 2.5rem; }
+
+/* Section */
+.section { margin-bottom: 2.5rem; }
+
+.section-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #999;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+/* The simple flow diagram */
+.flow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #f9f9f9;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 2.5rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.flow-item {
+  font-size: 0.82rem;
+  font-weight: 500;
+  padding: 0.35rem 0.75rem;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.flow-arrow { color: #bbb; font-size: 1rem; }
+
+.flow-item.hub {
+  background: #111;
+  color: white;
+  border-color: #111;
+}
+
+/* Steps */
+.steps { display: flex; flex-direction: column; gap: 0; }
+
+.step {
+  display: flex;
+  gap: 1.25rem;
+  padding: 1.1rem 0;
+  border-bottom: 1px solid #f0f0f0;
+  align-items: flex-start;
+}
+
+.step:last-child { border: none; }
+
+.step-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  padding-top: 2px;
+}
+
+.step-num {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: #f4f4f4;
+  border: 1px solid #e5e5e5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #666;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.step-num.done {
+  background: #111;
+  border-color: #111;
+  color: white;
+}
+
+.step-num.done::after { content: '✓'; }
+
+.step-right { flex: 1; }
+
+.step-title {
+  font-weight: 600;
+  font-size: 0.92rem;
+  margin-bottom: 0.2rem;
+}
+
+.step-detail {
+  font-size: 0.82rem;
+  color: #666;
+  line-height: 1.55;
+}
+
+.step-detail a {
+  color: #111;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.step-tags {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.t-free { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+.t-paid { background: #fff1f2; color: #e11d48; border: 1px solid #fecdd3; }
+.t-trial { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
+.t-tool { background: #f5f5f5; color: #555; border: 1px solid #e5e5e5; }
+
+/* Week header */
+.week-head {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 2rem 0 0.75rem;
+}
+
+.week-pill {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  font-weight: 500;
+  padding: 0.25rem 0.65rem;
+  border-radius: 20px;
+  background: #111;
+  color: white;
+}
+
+.week-pill.w-orange { background: #ea580c; }
+.week-pill.w-amber  { background: #d97706; }
+.week-pill.w-green  { background: #16a34a; }
+.week-pill.w-blue   { background: #2563eb; }
+
+.week-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.week-sub { font-size: 0.78rem; color: #999; margin-left: auto; }
+
+/* Callout */
+.callout {
+  border-radius: 10px;
+  padding: 0.9rem 1.1rem;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  margin: 1rem 0;
+}
+
+.callout.tip { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
+.callout.warn { background: #fff1f2; border: 1px solid #fecdd3; color: #9f1239; }
+.callout.info { background: #f0f9ff; border: 1px solid #bae6fd; color: #075985; }
+
+/* Score table */
+.score-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.83rem;
+  margin: 0.75rem 0;
+}
+
+.score-table th {
+  text-align: left;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #999;
+  padding: 0.4rem 0.6rem;
+  border-bottom: 1px solid #eee;
+}
+
+.score-table td {
+  padding: 0.55rem 0.6rem;
+  border-bottom: 1px solid #f5f5f5;
+  vertical-align: middle;
+}
+
+.score-table tr:last-child td { border: none; }
+
+.pts {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+}
+
+.ph { background: #fff7ed; color: #f97316; }
+.pm { background: #fef9c3; color: #d97706; }
+.pl { background: #eff6ff; color: #2563eb; }
+
+/* Threshold rows */
+.thresh {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.th-high { background: #fff7ed; border: 1px solid #fed7aa; }
+.th-mid  { background: #fefce8; border: 1px solid #fef08a; }
+.th-low  { background: #eff6ff; border: 1px solid #bfdbfe; }
+
+.thresh-score {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  padding-top: 1px;
+}
+
+.th-high .thresh-score { color: #ea580c; }
+.th-mid  .thresh-score { color: #d97706; }
+.th-low  .thresh-score { color: #2563eb; }
+
+/* Cost */
+.cost-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin: 0.75rem 0;
+}
+
+.cost-box {
+  background: #f9f9f9;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  padding: 1rem 1.1rem;
+}
+
+.cost-box h4 {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #999;
+  margin-bottom: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.cost-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  padding: 0.3rem 0;
+  border-bottom: 1px solid #eee;
+}
+
+.cost-row:last-child { border: none; }
+.cost-row .price { font-family: 'JetBrains Mono', monospace; font-size: 0.76rem; font-weight: 500; }
+.green { color: #16a34a; }
+.red   { color: #e11d48; }
+
+/* Today box */
+.today {
+  background: #111;
+  border-radius: 14px;
+  padding: 2rem;
+  margin: 2rem 0;
+  color: white;
+}
+
+.today h2 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 0.2rem;
+}
+
+.today .tsub { font-size: 0.8rem; color: #888; margin-bottom: 1.25rem; }
+
+.today-item {
+  display: flex;
+  gap: 0.85rem;
+  align-items: flex-start;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  font-size: 0.83rem;
+  color: rgba(255,255,255,0.65);
+  line-height: 1.5;
+}
+
+.today-item:last-child { border: none; }
+
+.today-item strong { color: white; }
+
+.ti-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #ea580c;
+  flex-shrink: 0;
+  padding-top: 2px;
+  width: 16px;
+}
+
+@media(max-width:480px) {
+  .cost-grid { grid-template-columns: 1fr; }
+  .flow { gap: 0.5rem; }
+}
+</style>
+</head>
+<body>
+
+<h1>How to Connect All Intent Sources</h1>
+<p class="sub">Simple guide for Younion · 8 weeks · Start free today</p>
+
+<!-- FLOW -->
+<div class="flow">
+  <span class="flow-item">🌊 Bombora</span>
+  <span class="flow-item">⭐ G2</span>
+  <span class="flow-item">🚀 Apollo</span>
+  <span class="flow-item">🔭 ZoomInfo</span>
+  <span class="flow-item">💼 LinkedIn</span>
+  <span class="flow-item">🏆 Clutch</span>
+  <span class="flow-arrow">→</span>
+  <span class="flow-item">📊 Google Sheet</span>
+  <span class="flow-arrow">→</span>
+  <span class="flow-item hub">🏠 HubSpot CRM</span>
+  <span class="flow-arrow">→</span>
+  <span class="flow-item">📞 Sales Acts</span>
+</div>
+
+<!-- WEEK 1 -->
+<div class="week-head">
+  <span class="week-pill w-orange">Week 1</span>
+  <span class="week-title">Build the Hub</span>
+  <span class="week-sub">Free · 3–4 hrs</span>
+</div>
+<div class="steps">
+
+  <div class="step">
+    <div class="step-left"><div class="step-num" onclick="tick(this)">1</div></div>
+    <div class="step-right">
+      <div class="step-title">Create HubSpot free account</div>
+      <div class="step-detail">Go to <a href="https://hubspot.com" target="_blank">hubspot.com</a> → sign up free. No credit card needed.</div>
+      <div class="step-tags"><span class="tag t-free">Free forever</span></div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-left"><div class="step-num" onclick="tick(this)">2</div></div>
+    <div class="step-right">
+      <div class="step-title">Add 4 custom fields to HubSpot companies</div>
+      <div class="step-detail">Settings → Properties → Company → Create property. Add: <strong>Intent Score</strong> (number), <strong>Intent Level</strong> (dropdown: High/Medium/Low), <strong>Intent Source</strong> (text), <strong>Last Signal Date</strong> (date).</div>
+      <div class="step-tags"><span class="tag t-tool">20 minutes</span></div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-left"><div class="step-num" onclick="tick(this)">3</div></div>
+    <div class="step-right">
+      <div class="step-title">Create "Intent Master" Google Sheet</div>
+      <div class="step-detail">Make a sheet with 7 tabs: <strong>MASTER</strong>, <strong>BOMBORA</strong>, <strong>G2</strong>, <strong>APOLLO</strong>, <strong>ZOOMINFO</strong>, <strong>LINKEDIN</strong>, <strong>CLUTCH</strong>. Every Monday you paste each source's export into its tab. MASTER calculates the scores.</div>
+      <div class="step-tags"><span class="tag t-free">Free</span><span class="tag t-tool">sheets.google.com</span></div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-left"><div class="step-num" onclick="tick(this)">4</div></div>
+    <div class="step-right">
+      <div class="step-title">Import your Target Account List into HubSpot</div>
+      <div class="step-detail">Export your 200–500 target companies as CSV → HubSpot → Import → Companies. Needs: Company Name, Domain, Industry.</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- WEEK 2 -->
+<div class="week-head">
+  <span class="week-pill w-orange">Week 2</span>
+  <span class="week-title">Connect Free Sources</span>
+  <span class="week-sub">G2 · Apollo · Clutch · LinkedIn</span>
+</div>
+
+<div class="callout tip">💡 These 4 sources are completely free. Connect them before spending any money.</div>
+
+<div class="steps">
+
+  <div class="step">
+    <div class="step-left"><div class="step-num" onclick="tick(this)">5</div></div>
+    <div class="step-right">
+      <div class="step-title">Claim Younion's G2 profile → connect to HubSpot</div>
+      <div class="step-detail">Go to <a href="https://g2.com" target="_blank">g2.com</a> → search Younion → Claim → fill in services + 3 case studies. Then: G2 admin → Integrations → HubSpot → Connect. Done. Every profile view auto-updates HubSpot.</div>
+      <div class="step-tags"><span class="tag t-free">Free · Native integration · No code</span></div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-left"><div class="step-num" onclick="tick(this)">6</div></div>
+    <div class="step-right">
+      <div class="step-title">Sign up Apollo.io → connect to HubSpot</div>
+      <div class="step-detail">Go to <a href="https://apollo.io" target="_blank">apollo.io</a> → sign up free → Settings → Integrations → HubSpot → Connect. Set ICP filters: CMO / Marketing Head / Brand Manager at FMCG, BFSI, Pharma companies in India. Export 100 contacts/month free.</div>
+      <div class="step-tags"><span class="tag t-free">100 exports/month free · Native integration</span></div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-left"><div class="step-num" onclick="tick(this)">7</div></div>
+    <div class="step-right">
+      <div class="step-title">List on Clutch.co → auto-push enquiries to HubSpot</div>
+      <div class="step-detail">Go to <a href="https://clutch.co" target="_blank">clutch.co</a> → List Younion → add services + 5 portfolio projects. Then go to <a href="https://zapier.com" target="_blank">zapier.com</a> → create a Zap: Clutch enquiry email → HubSpot new contact. Every enquiry auto-creates a CRM record.</div>
+      <div class="step-tags"><span class="tag t-free">Clutch free · Zapier free tier</span></div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-left"><div class="step-num" onclick="tick(this)">8</div></div>
+    <div class="step-right">
+      <div class="step-title">LinkedIn: export analytics weekly → paste into Sheet</div>
+      <div class="step-detail">Every Monday: LinkedIn Company Page → Analytics → Visitor Analytics → Export XLS → paste companies from your TAL into the LINKEDIN tab. Takes 5 minutes.</div>
+      <div class="step-tags"><span class="tag t-free">Free · 5 min/week</span></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- WEEK 3-4 -->
+<div class="week-head">
+  <span class="week-pill w-amber">Week 3–4</span>
+  <span class="week-title">Add Paid Sources (After Validating)</span>
+  <span class="week-sub">ZoomInfo · Bombora</span>
+</div>
+
+<div class="callout warn">⚠️ Only do this after your free sources are working and giving signals. Don't spend money before you've proven the process.</div>
+
+<div class="steps">
+
+  <div class="step">
+    <div class="step-left"><div class="step-num" onclick="tick(this)">9</div></div>
+    <div class="step-right">
+      <div class="step-title">Start ZoomInfo 14-day free trial</div>
+      <div class="step-detail">Go to <a href="https://zoominfo.com" target="_blank">zoominfo.com</a> → request trial → upload your TAL → set intent topics ("B2B Event Management", "Experiential Marketing", "Brand Activation") → connect to HubSpot natively.</div>
+      <div class="step-tags"><span class="tag t-trial">14-day free trial</span></div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-left"><div class="step-num" onclick="tick(this)">10</div></div>
+    <div class="step-right">
+      <div class="step-title">Add Bombora via HubSpot Marketplace</div>
+      <div class="step-detail">HubSpot → Marketplace → search "Bombora" → Install → configure surge topics. Bombora pushes weekly data directly into your HubSpot company records automatically. No CSV needed.</div>
+      <div class="step-tags"><span class="tag t-paid">~₹42,000/month · Add only after validating ZoomInfo</span></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- WEEK 5-6 -->
+<div class="week-head">
+  <span class="week-pill w-green">Week 5–6</span>
+  <span class="week-title">Automate with Zapier</span>
+  <span class="week-sub">3 automations · Zero manual work after</span>
+</div>
+
+<div class="steps">
+
+  <div class="step">
+    <div class="step-left"><div class="step-num" onclick="tick(this)">11</div></div>
+    <div class="step-right">
+      <div class="step-title">Zap 1 — Sheet → HubSpot weekly sync</div>
+      <div class="step-detail">Trigger: Google Sheet row updated → Action: HubSpot update company (Intent Score, Level, Source, Date). Every Monday after you paste exports, HubSpot auto-updates.</div>
+      <div class="step-tags"><span class="tag t-free">Zapier free</span></div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-left"><div class="step-num" onclick="tick(this)">12</div></div>
+    <div class="step-right">
+      <div class="step-title">Zap 2 — Daily 9am Slack alert</div>
+      <div class="step-detail">Trigger: Schedule (daily 9am) → Action: HubSpot find companies with Score ≥ 60 → Action: Slack post "🔥 Today's hot accounts: [list]" in #sales channel.</div>
+      <div class="step-tags"><span class="tag t-free">Zapier free</span></div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-left"><div class="step-num" onclick="tick(this)">13</div></div>
+    <div class="step-right">
+      <div class="step-title">Zap 3 — High Intent → task + email sequence</div>
+      <div class="step-detail">Trigger: HubSpot company Intent Score reaches 60 → Action: Create SDR task "Call [Company] today" → Action: Enroll in High Intent email sequence.</div>
+      <div class="step-tags"><span class="tag t-free">Zapier free</span></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- WEEK 7-8 -->
+<div class="week-head">
+  <span class="week-pill w-blue">Week 7–8</span>
+  <span class="week-title">Scoring + Weekly Rhythm</span>
+  <span class="week-sub">How points work · What sales does</span>
+</div>
+
+<table class="score-table">
+  <thead>
+    <tr><th>Signal</th><th>Source</th><th>Points</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Compared you vs competitors</td><td>G2</td><td><span class="pts ph">+30</span></td></tr>
+    <tr><td>High topic surge (70%+)</td><td>Bombora</td><td><span class="pts ph">+35</span></td></tr>
+    <tr><td>In-market signal detected</td><td>ZoomInfo</td><td><span class="pts pm">+20</span></td></tr>
+    <tr><td>Viewed your profile</td><td>G2</td><td><span class="pts pm">+20</span></td></tr>
+    <tr><td>Moderate topic surge (40–69%)</td><td>Bombora</td><td><span class="pts pm">+20</span></td></tr>
+    <tr><td>Intent-active contact found</td><td>Apollo</td><td><span class="pts pm">+15</span></td></tr>
+    <tr><td>Engaged with your LinkedIn post</td><td>LinkedIn</td><td><span class="pts pl">+15</span></td></tr>
+    <tr><td>Enquiry from directory</td><td>Clutch/IndiaMart</td><td><span class="pts pl">+10</span></td></tr>
+  </tbody>
+</table>
+
+<div style="margin: 1rem 0;">
+  <div class="thresh th-high"><span class="thresh-score">60+</span> <span>🔴 <strong>Call today.</strong> SDR calls within 4 hours. Reference exactly what they were researching.</span></div>
+  <div class="thresh th-mid"><span class="thresh-score">25–59</span> <span>🟡 <strong>Nurture.</strong> Add to email sequence + LinkedIn connect. Check back in 2 weeks.</span></div>
+  <div class="thresh th-low"><span class="thresh-score">&lt;25</span> <span>🔵 <strong>Don't call yet.</strong> Marketing only — newsletter and retargeting ads.</span></div>
+</div>
+
+<div class="callout info">
+  📅 <strong>Monday routine (30 min):</strong> 8:30am — export CSVs from all sources → paste into Sheet → 9am Zapier posts hot accounts to Slack automatically → SDR opens HubSpot High Intent view and starts calling.
+</div>
+
+<!-- COST -->
+<div style="margin: 2rem 0 0.5rem; font-size:0.7rem;text-transform:uppercase;letter-spacing:0.15em;color:#999;font-weight:600;">Cost</div>
+<div class="cost-grid">
+  <div class="cost-box">
+    <h4>Month 1 — Free</h4>
+    <div class="cost-row"><span>HubSpot CRM</span><span class="price green">₹0</span></div>
+    <div class="cost-row"><span>G2 Profile</span><span class="price green">₹0</span></div>
+    <div class="cost-row"><span>Apollo.io</span><span class="price green">₹0</span></div>
+    <div class="cost-row"><span>Zapier</span><span class="price green">₹0</span></div>
+    <div class="cost-row"><span>Clutch</span><span class="price green">₹0</span></div>
+    <div class="cost-row" style="border-top:1px solid #ddd;margin-top:.4rem;padding-top:.5rem;font-weight:600;"><span>Total</span><span class="price green" style="font-size:0.9rem;">₹0</span></div>
+  </div>
+  <div class="cost-box">
+    <h4>Month 3+ — Full Stack</h4>
+    <div class="cost-row"><span>HubSpot Starter</span><span class="price">₹1,800</span></div>
+    <div class="cost-row"><span>Apollo Basic</span><span class="price">₹3,500</span></div>
+    <div class="cost-row"><span>Zapier Starter</span><span class="price">₹1,700</span></div>
+    <div class="cost-row"><span>ZoomInfo</span><span class="price">~₹25,000</span></div>
+    <div class="cost-row"><span>Bombora</span><span class="price">~₹42,000</span></div>
+    <div class="cost-row" style="border-top:1px solid #ddd;margin-top:.4rem;padding-top:.5rem;font-weight:600;"><span>Total</span><span class="price red" style="font-size:0.9rem;">~₹74,000</span></div>
+  </div>
+</div>
+
+<!-- TODAY BOX -->
+<div class="today">
+  <h2>Start today — 2 hours</h2>
+  <p class="tsub">Do these 5 things right now</p>
+  <div class="today-item"><span class="ti-num">1</span><span><strong>hubspot.com</strong> → create free account → add 4 intent fields</span></div>
+  <div class="today-item"><span class="ti-num">2</span><span><strong>sheets.google.com</strong> → create "Intent Master" with 7 tabs</span></div>
+  <div class="today-item"><span class="ti-num">3</span><span><strong>g2.com</strong> → claim Younion profile → connect to HubSpot</span></div>
+  <div class="today-item"><span class="ti-num">4</span><span><strong>apollo.io</strong> → sign up → set ICP filters → export 100 contacts</span></div>
+  <div class="today-item"><span class="ti-num">5</span><span><strong>clutch.co</strong> → create free listing → add services</span></div>
+</div>
+
+<script>
+function tick(el) {
+  el.classList.toggle('done');
+  if (!el.classList.contains('done')) el.textContent = el.dataset.n || '';
+}
+// Set step numbers as data attribute so we can restore them
+document.querySelectorAll('.step-num').forEach((el, i) => {
+  el.dataset.n = el.textContent;
+});
+</script>
+</body>
+</html>
