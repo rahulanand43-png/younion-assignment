@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Younion · 3rd Party B2B Intent Signal Engine</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#07090f;--surface:#0d1117;--surface2:#131923;--surface3:#1a2333;
+  --border:#1e2d42;--border2:#243450;
+  --high:#f97316;--high-glow:rgba(249,115,22,0.14);
+  --mid:#eab308;--mid-glow:rgba(234,179,8,0.12);
+  --low:#3b82f6;--low-glow:rgba(59,130,246,0.12);
+  --green:#22c55e;--green-glow:rgba(34,197,94,0.12);
+  --text:#e2e8f0;--text-dim:#64748b;--text-mid:#94a3b8;
+  --fd:'Bebas Neue',sans-serif;--fb:'Outfit',sans-serif;--fm:'JetBrains Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100vh;overflow-x:hidden;}
+/* TOPBAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:.9rem 2rem;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;}
+.logo{font-family:var(--fd);font-size:1.5rem;letter-spacing:3px;color:var(--high);}
+.logo span{color:var(--text);}
+.topbar-center{display:flex;gap:.25rem;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:.25rem;}
+.nav-btn{font-family:var(--fm);font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;padding:.45rem 1.1rem;border-radius:5px;border:none;background:transparent;color:var(--text-dim);cursor:pointer;transition:all .2s;}
+.nav-btn.active{background:var(--surface3);color:var(--text);border:1px solid var(--border2);}
+.live-ind{display:flex;align-items:center;gap:.5rem;font-family:var(--fm);font-size:.6rem;color:var(--green);letter-spacing:.1em;text-transform:uppercase;}
+.pdot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pp 2s ease infinite;}
+@keyframes pp{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(.8);}}
+/* STRIP */
+.strip{background:var(--surface2);border-bottom:1px solid var(--border);padding:.75rem 2rem;}
+.strip-inner{max-width:1500px;margin:0 auto;display:flex;align-items:center;gap:2rem;flex-wrap:wrap;}
+.strip-label{font-family:var(--fm);font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--high);}
+/* MAIN */
+.main{max-width:1500px;margin:0 auto;padding:1.5rem 2rem;}
+.view-panel{display:none;}
+.view-panel.active{display:block;}
+/* KPI */
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:.75rem;margin-bottom:1.25rem;}
+.kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.1rem 1.25rem;position:relative;overflow:hidden;}
+.kpi-card::before{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;}
+.kc-o::before{background:var(--high);}
+.kc-y::before{background:var(--mid);}
+.kc-b::before{background:var(--low);}
+.kc-g::before{background:var(--green);}
+.kc-n::before{background:var(--text-dim);}
+.kpi-label{font-family:var(--fm);font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin-bottom:.5rem;}
+.kpi-val{font-family:var(--fd);font-size:2.4rem;letter-spacing:1px;line-height:1;}
+.kc-o .kpi-val{color:var(--high);}
+.kc-y .kpi-val{color:var(--mid);}
+.kc-b .kpi-val{color:var(--low);}
+.kc-g .kpi-val{color:var(--green);}
+.kpi-sub{font-size:.65rem;color:var(--text-dim);margin-top:.3rem;}
+/* GRIDS */
+.grid-2-1{display:grid;grid-template-columns:1.6fr 1fr;gap:1rem;margin-bottom:1rem;}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1rem;}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1rem;}
+/* PANEL */
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.25rem;overflow:hidden;}
+.ptitle{font-family:var(--fm);font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--text-dim);margin-bottom:1.1rem;display:flex;align-items:center;justify-content:space-between;}
+.pbadge{font-family:var(--fm);font-size:.55rem;padding:.2rem .5rem;border-radius:4px;letter-spacing:.08em;}
+.pb-hot{background:var(--high-glow);color:var(--high);border:1px solid rgba(249,115,22,.3);}
+.pb-live{background:var(--green-glow);color:var(--green);border:1px solid rgba(34,197,94,.3);}
+/* TABLE */
+.atable{width:100%;border-collapse:collapse;font-size:.78rem;}
+.atable th{font-family:var(--fm);font-size:.55rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);text-align:left;padding:0 .75rem .75rem;border-bottom:1px solid var(--border);}
+.atable td{padding:.7rem .75rem;border-bottom:1px solid rgba(30,45,66,.4);vertical-align:middle;}
+.atable tr:last-child td{border:none;}
+.atable tr:hover td{background:var(--surface2);cursor:pointer;}
+.co-cell{display:flex;align-items:center;gap:.75rem;}
+.co-av{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:.85rem;flex-shrink:0;}
+.co-name{font-weight:500;font-size:.82rem;}
+.co-dom{font-family:var(--fm);font-size:.6rem;color:var(--text-dim);}
+.sc-cell{display:flex;align-items:center;gap:.6rem;}
+.sc-num{font-family:var(--fd);font-size:1.3rem;width:38px;text-align:right;flex-shrink:0;}
+.sc-bg{flex:1;height:5px;background:var(--surface3);border-radius:3px;overflow:hidden;}
+.sc-fill{height:100%;border-radius:3px;}
+/* BADGES */
+.ibadge{display:inline-flex;align-items:center;gap:.35rem;font-family:var(--fm);font-size:.58rem;letter-spacing:.06em;text-transform:uppercase;padding:.25rem .65rem;border-radius:100px;white-space:nowrap;}
+.ib-h{background:var(--high-glow);color:var(--high);border:1px solid rgba(249,115,22,.25);}
+.ib-m{background:var(--mid-glow);color:var(--mid);border:1px solid rgba(234,179,8,.25);}
+.ib-l{background:var(--low-glow);color:var(--low);border:1px solid rgba(59,130,246,.25);}
+/* SOURCE TAGS */
+.stags{display:flex;flex-wrap:wrap;gap:.3rem;}
+.stag{font-family:var(--fm);font-size:.55rem;padding:.15rem .45rem;border-radius:3px;letter-spacing:.05em;text-transform:uppercase;}
+.st-bombora{background:rgba(147,51,234,.15);color:#a855f7;border:1px solid rgba(147,51,234,.2);}
+.st-g2{background:rgba(239,68,68,.12);color:#f87171;border:1px solid rgba(239,68,68,.2);}
+.st-apollo{background:rgba(6,182,212,.12);color:#22d3ee;border:1px solid rgba(6,182,212,.2);}
+.st-zoominfo{background:rgba(245,158,11,.12);color:#fbbf24;border:1px solid rgba(245,158,11,.2);}
+.st-linkedin{background:rgba(59,130,246,.12);color:#60a5fa;border:1px solid rgba(59,130,246,.2);}
+.st-clutch{background:rgba(249,115,22,.12);color:#fb923c;border:1px solid rgba(249,115,22,.2);}
+/* ACTION BTN */
+.abtn{font-family:var(--fm);font-size:.6rem;letter-spacing:.08em;padding:.3rem .75rem;border-radius:5px;border:none;cursor:pointer;text-transform:uppercase;transition:all .2s;}
+.ab-call{background:var(--high-glow);color:var(--high);border:1px solid rgba(249,115,22,.3);}
+.ab-call:hover{background:var(--high);color:#000;}
+.ab-nurture{background:var(--mid-glow);color:var(--mid);border:1px solid rgba(234,179,8,.3);}
+.ab-nurture:hover{background:var(--mid);color:#000;}
+.ab-watch{background:var(--low-glow);color:var(--low);border:1px solid rgba(59,130,246,.3);}
+/* SIGNAL FEED */
+.sfeed{display:flex;flex-direction:column;gap:.5rem;}
+.sitem{display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--surface2);border-radius:8px;border:1px solid var(--border);transition:border-color .2s;}
+.sitem:hover{border-color:var(--border2);}
+.sicon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.75rem;flex-shrink:0;}
+.si-bo{background:rgba(147,51,234,.15);}
+.si-g2{background:rgba(239,68,68,.12);}
+.si-ap{background:rgba(6,182,212,.12);}
+.si-zi{background:rgba(245,158,11,.12);}
+.si-li{background:rgba(59,130,246,.12);}
+.si-cl{background:rgba(249,115,22,.12);}
+.sbody{flex:1;}
+.sco{font-size:.78rem;font-weight:600;margin-bottom:.15rem;}
+.sdet{font-size:.7rem;color:var(--text-mid);line-height:1.4;}
+.stime{font-family:var(--fm);font-size:.55rem;color:var(--text-dim);margin-top:.25rem;white-space:nowrap;}
+/* BAR CHART */
+.bchart{display:flex;flex-direction:column;gap:.7rem;}
+.bc-row{display:flex;align-items:center;gap:.75rem;}
+.bc-lbl{font-size:.72rem;color:var(--text-mid);width:100px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.bc-track{flex:1;height:7px;background:var(--surface3);border-radius:4px;overflow:hidden;}
+.bc-fill{height:100%;border-radius:4px;}
+.bc-val{font-family:var(--fm);font-size:.65rem;color:var(--text-dim);width:30px;text-align:right;}
+/* DONUT */
+.donut-wrap{display:flex;align-items:center;gap:1.5rem;}
+.donut{width:110px;height:110px;border-radius:50%;flex-shrink:0;background:conic-gradient(var(--high) 0deg 97deg,var(--mid) 97deg 206deg,var(--low) 206deg 360deg);position:relative;}
+.donut::after{content:'';position:absolute;inset:22px;background:var(--surface);border-radius:50%;}
+.dl-item{display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem;font-size:.75rem;}
+.dl-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0;}
+.dl-lbl{color:var(--text-mid);flex:1;}
+.dl-val{font-family:var(--fm);font-size:.65rem;}
+/* TOPIC SURGE */
+.topic-row{display:flex;align-items:center;gap:.75rem;padding:.6rem 0;border-bottom:1px solid rgba(30,45,66,.4);}
+.topic-row:last-child{border:none;}
+.topic-name{font-size:.78rem;flex:1;}
+.surge-bar{width:80px;height:5px;background:var(--surface3);border-radius:3px;overflow:hidden;}
+.surge-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--high),var(--mid));}
+.surge-val{font-family:var(--fm);font-size:.65rem;color:var(--high);width:45px;text-align:right;}
+/* SOURCE GRID */
+.source-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;}
+.sc-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:1rem;transition:border-color .2s;}
+.sc-card:hover{border-color:var(--border2);}
+.sc-hd{display:flex;align-items:center;gap:.6rem;margin-bottom:.75rem;}
+.sc-ico{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.75rem;}
+.sc-nm{font-size:.78rem;font-weight:600;}
+.sc-tp{font-family:var(--fm);font-size:.55rem;color:var(--text-dim);}
+.sc-stat{font-family:var(--fd);font-size:1.8rem;letter-spacing:1px;line-height:1;margin-bottom:.2rem;}
+.sc-sub{font-size:.65rem;color:var(--text-dim);}
+/* FUNNEL */
+.funnel{display:flex;flex-direction:column;gap:.4rem;padding:.5rem 0;}
+.funnel-stage{display:grid;grid-template-columns:100px 1fr 60px;align-items:center;gap:.75rem;}
+.fs-lbl{font-size:.72rem;color:var(--text-mid);text-align:right;}
+.fs-wrap{height:36px;background:var(--surface3);border-radius:5px;overflow:hidden;display:flex;align-items:center;}
+.fs-bar{height:100%;border-radius:5px;display:flex;align-items:center;padding-left:.75rem;font-size:.7rem;font-weight:600;}
+.fs-cnt{font-family:var(--fd);font-size:1.2rem;color:var(--text);}
+.farr{text-align:center;color:var(--border2);font-size:.7rem;padding:.1rem 0;}
+/* HOW IT WORKS */
+.ec-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2rem;}
+.ec{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.25rem;}
+.ec-icon{font-size:1.5rem;margin-bottom:.6rem;}
+.ec h3{font-size:.9rem;font-weight:600;margin-bottom:.4rem;}
+.ec p{font-size:.78rem;color:var(--text-mid);line-height:1.6;font-weight:300;}
+.proc-flow{display:flex;align-items:flex-start;gap:0;overflow-x:auto;padding-bottom:.5rem;margin:1.5rem 0;}
+.pf-step{flex-shrink:0;width:180px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1rem;}
+.pf-arr{flex-shrink:0;width:40px;display:flex;align-items:center;justify-content:center;color:var(--border2);font-size:1.2rem;padding-top:1.5rem;}
+.pf-num{font-family:var(--fd);font-size:2rem;color:var(--high);opacity:.3;line-height:1;margin-bottom:.3rem;}
+.pf-tit{font-size:.82rem;font-weight:600;margin-bottom:.3rem;}
+.pf-des{font-size:.72rem;color:var(--text-mid);line-height:1.5;font-weight:300;}
+/* DATA TABLE */
+.data-sample{overflow-x:auto;border-radius:10px;border:1px solid var(--border);}
+.dstable{width:100%;border-collapse:collapse;font-size:.72rem;white-space:nowrap;}
+.dstable th{background:var(--surface2);font-family:var(--fm);font-size:.52rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);padding:.65rem .85rem;text-align:left;border-bottom:1px solid var(--border);}
+.dstable td{padding:.55rem .85rem;border-bottom:1px solid rgba(30,45,66,.3);color:var(--text-mid);}
+.dstable tr:last-child td{border:none;}
+.dstable tr:hover td{background:var(--surface2);color:var(--text);}
+.dstable td:first-child{color:var(--text);font-weight:500;}
+/* MODAL */
+.modal-ov{position:fixed;inset:0;background:rgba(7,9,15,.88);backdrop-filter:blur(4px);z-index:1000;display:none;align-items:center;justify-content:center;}
+.modal-ov.open{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:2rem;width:600px;max-width:90vw;max-height:85vh;overflow-y:auto;animation:fup .3s ease;}
+@keyframes fup{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+.modal-hd{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.5rem;}
+.modal-t{font-size:1.1rem;font-weight:700;}
+.modal-s{font-family:var(--fm);font-size:.6rem;color:var(--text-dim);margin-top:.2rem;}
+.mcls{background:var(--surface2);border:1px solid var(--border);border-radius:6px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-dim);font-size:.8rem;transition:all .2s;}
+.mcls:hover{color:var(--text);}
+.msec-t{font-family:var(--fm);font-size:.58rem;letter-spacing:.15em;text-transform:uppercase;color:var(--text-dim);margin-bottom:.6rem;padding-bottom:.4rem;border-bottom:1px solid var(--border);}
+.st-item{display:flex;gap:.75rem;align-items:flex-start;margin-bottom:.5rem;}
+.st-dot{width:8px;height:8px;border-radius:50%;margin-top:4px;flex-shrink:0;}
+.st-txt{font-size:.78rem;color:var(--text-mid);line-height:1.5;}
+.st-txt strong{color:var(--text);}
+.st-dt{font-family:var(--fm);font-size:.6rem;color:var(--text-dim);}
+/* scrollbar */
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:var(--surface);}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+@media(max-width:1200px){.kpi-row{grid-template-columns:repeat(3,1fr);}.grid-2-1{grid-template-columns:1fr;}.grid-3{grid-template-columns:1fr 1fr;}.ec-grid{grid-template-columns:1fr 1fr;}.source-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:768px){.kpi-row{grid-template-columns:1fr 1fr;}.topbar-center{display:none;}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">YOUNION <span>·</span> INTENT</div>
+  <div class="topbar-center">
+    <button class="nav-btn active" onclick="switchView('overview',this)">Overview</button>
+    <button class="nav-btn" onclick="switchView('sales',this)">Sales View</button>
+    <button class="nav-btn" onclick="switchView('marketing',this)">Marketing View</button>
+    <button class="nav-btn" onclick="switchView('howit',this)">How It Works</button>
+    <button class="nav-btn" onclick="switchView('dataset',this)">Sample Data</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:1rem;">
+    <div class="live-ind"><div class="pdot"></div>3rd Party Intent · Live</div>
+    <div style="font-family:var(--fm);font-size:.6rem;color:var(--text-dim);" id="dateBadge"></div>
+  </div>
+</div>
+
+<div class="strip">
+  <div class="strip-inner">
+    <div class="strip-label">Active 3rd Party Sources:</div>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+      <span class="stag st-bombora">Bombora</span>
+      <span class="stag st-g2">G2 / Capterra</span>
+      <span class="stag st-apollo">Apollo.io</span>
+      <span class="stag st-zoominfo">ZoomInfo</span>
+      <span class="stag st-linkedin">LinkedIn Intent</span>
+      <span class="stag st-clutch">Clutch.co</span>
+    </div>
+    <div style="margin-left:auto;font-size:.72rem;color:var(--text-dim);">Tracking companies researching <strong style="color:var(--text);">experiential marketing, B2B events, brand activation</strong> — before they visit younion.live</div>
+  </div>
+</div>
+
+<!-- OVERVIEW -->
+<div id="view-overview" class="view-panel active">
+<div class="main">
+  <div class="kpi-row">
+    <div class="kpi-card kc-o"><div class="kpi-label">High Intent Accounts</div><div class="kpi-val">18</div><div class="kpi-sub">Score ≥ 60 · Call Today</div></div>
+    <div class="kpi-card kc-y"><div class="kpi-label">Medium Intent</div><div class="kpi-val">34</div><div class="kpi-sub">Score 25–59 · SDR Nurture</div></div>
+    <div class="kpi-card kc-b"><div class="kpi-label">Low Intent Watching</div><div class="kpi-val">87</div><div class="kpi-sub">Score &lt;25 · Marketing Only</div></div>
+    <div class="kpi-card kc-g"><div class="kpi-label">New Signals Today</div><div class="kpi-val">41</div><div class="kpi-sub">Across all 6 sources</div></div>
+    <div class="kpi-card kc-n"><div class="kpi-label">Intent Surge This Week</div><div class="kpi-val">+62%</div><div class="kpi-sub">vs. last week · 139 total</div></div>
+  </div>
+
+  <div class="grid-2-1">
+    <div class="panel">
+      <div class="ptitle"><div style="display:flex;align-items:center;gap:.6rem;">Top Intent Accounts <span class="pbadge pb-hot">🔥 18 Hot</span></div></div>
+      <table class="atable"><thead><tr><th>Company</th><th>Intent Score</th><th>Level</th><th>Surge Topics</th><th>Sources</th><th>Action</th></tr></thead>
+      <tbody id="accountsBody"></tbody></table>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:1rem;">
+      <div class="panel">
+        <div class="ptitle"><div style="display:flex;align-items:center;gap:.6rem;">Live Signal Feed <span class="pbadge pb-live">● Live</span></div></div>
+        <div class="sfeed" id="signalFeed"></div>
+      </div>
+      <div class="panel">
+        <div class="ptitle">Top Intent Topics · Bombora Surge</div>
+        <div id="topicSurge"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-bottom:1rem;">
+    <div class="ptitle">3rd Party Source Performance</div>
+    <div class="source-grid" id="sourceGrid"></div>
+  </div>
+</div>
+</div>
+
+<!-- SALES VIEW -->
+<div id="view-sales" class="view-panel">
+<div class="main">
+  <div style="margin-bottom:1.25rem;display:flex;align-items:center;gap:1rem;">
+    <div style="font-family:var(--fd);font-size:2.5rem;letter-spacing:2px;color:var(--high);">SALES COCKPIT</div>
+    <div style="font-size:.78rem;color:var(--text-dim);font-weight:300;">Your high-intent accounts ranked by priority — call the top ones today.</div>
+  </div>
+  <div class="kpi-row" style="grid-template-columns:repeat(4,1fr);">
+    <div class="kpi-card kc-o"><div class="kpi-label">Call Today (60+)</div><div class="kpi-val">18</div><div class="kpi-sub">Avg Score: 74</div></div>
+    <div class="kpi-card kc-y"><div class="kpi-label">SDR Queue (25–59)</div><div class="kpi-val">34</div><div class="kpi-sub">Follow up this week</div></div>
+    <div class="kpi-card kc-g"><div class="kpi-label">Meetings Booked</div><div class="kpi-val">6</div><div class="kpi-sub">From intent leads</div></div>
+    <div class="kpi-card kc-n"><div class="kpi-label">Avg Response Time</div><div class="kpi-val">2.1h</div><div class="kpi-sub">Target: &lt; 4 hours</div></div>
+  </div>
+  <div class="grid-2-1">
+    <div class="panel">
+      <div class="ptitle"><div style="display:flex;align-items:center;gap:.6rem;">Priority Call List <span class="pbadge pb-hot">🔴 Act Now</span></div></div>
+      <table class="atable"><thead><tr><th>Company</th><th>Score</th><th>Why They're Hot</th><th>Decision Maker</th><th>Last Signal</th><th>Action</th></tr></thead>
+      <tbody id="salesBody"></tbody></table>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:1rem;">
+      <div class="panel">
+        <div class="ptitle">Intent Distribution</div>
+        <div class="donut-wrap" style="margin-top:.5rem;">
+          <div class="donut"></div>
+          <div>
+            <div class="dl-item"><div class="dl-dot" style="background:var(--high);"></div><div class="dl-lbl">High Intent (60+)</div><div class="dl-val" style="color:var(--high);">18 · 13%</div></div>
+            <div class="dl-item"><div class="dl-dot" style="background:var(--mid);"></div><div class="dl-lbl">Medium (25–59)</div><div class="dl-val" style="color:var(--mid);">34 · 25%</div></div>
+            <div class="dl-item"><div class="dl-dot" style="background:var(--low);"></div><div class="dl-lbl">Low (&lt;25)</div><div class="dl-val" style="color:var(--low);">87 · 62%</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="ptitle">SDR Playbook</div>
+        <div style="display:flex;flex-direction:column;gap:.6rem;">
+          <div style="background:var(--high-glow);border:1px solid rgba(249,115,22,.2);border-radius:8px;padding:.85rem 1rem;">
+            <div style="font-family:var(--fm);font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--high);margin-bottom:.35rem;">🔴 Score ≥ 60 — High Intent</div>
+            <div style="font-size:.78rem;color:var(--text-mid);line-height:1.5;">Call within <strong style="color:var(--text);">4 hours</strong> · Reference exact topic · Send personalised case study · Log in CRM immediately</div>
+          </div>
+          <div style="background:var(--mid-glow);border:1px solid rgba(234,179,8,.2);border-radius:8px;padding:.85rem 1rem;">
+            <div style="font-family:var(--fm);font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--mid);margin-bottom:.35rem;">🟡 Score 25–59 — Medium</div>
+            <div style="font-size:.78rem;color:var(--text-mid);line-height:1.5;">Add to <strong style="color:var(--text);">5-touch nurture</strong> · LinkedIn connect + message · Enrol in retargeting audience</div>
+          </div>
+          <div style="background:var(--low-glow);border:1px solid rgba(59,130,246,.2);border-radius:8px;padding:.85rem 1rem;">
+            <div style="font-family:var(--fm);font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--low);margin-bottom:.35rem;">🔵 Score &lt;25 — Low Intent</div>
+            <div style="font-size:.78rem;color:var(--text-mid);line-height:1.5;"><strong style="color:var(--text);">Do not call yet.</strong> Marketing handles — newsletter, ads, content only</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- MARKETING VIEW -->
+<div id="view-marketing" class="view-panel">
+<div class="main">
+  <div style="margin-bottom:1.25rem;display:flex;align-items:center;gap:1rem;">
+    <div style="font-family:var(--fd);font-size:2.5rem;letter-spacing:2px;color:var(--mid);">MARKETING COMMAND</div>
+    <div style="font-size:.78rem;color:var(--text-dim);font-weight:300;">Which channels produce highest-intent leads — and where to focus spend.</div>
+  </div>
+  <div class="kpi-row" style="grid-template-columns:repeat(4,1fr);">
+    <div class="kpi-card kc-y"><div class="kpi-label">Total Intent Accounts</div><div class="kpi-val">139</div><div class="kpi-sub">Across all 6 sources</div></div>
+    <div class="kpi-card kc-o"><div class="kpi-label">High Intent Rate</div><div class="kpi-val">13%</div><div class="kpi-sub">18 of 139 accounts</div></div>
+    <div class="kpi-card kc-g"><div class="kpi-label">Best Channel</div><div class="kpi-val">Bombora</div><div class="kpi-sub">38% high-intent rate</div></div>
+    <div class="kpi-card kc-b"><div class="kpi-label">Retargeting Audience</div><div class="kpi-val">121</div><div class="kpi-sub">Medium + low accounts</div></div>
+  </div>
+  <div class="grid-3">
+    <div class="panel">
+      <div class="ptitle">Intent Funnel (This Week)</div>
+      <div class="funnel">
+        <div class="funnel-stage"><div class="fs-lbl">All 3rd Party</div><div class="fs-wrap"><div class="fs-bar" style="width:100%;background:rgba(100,116,139,.2);color:var(--text-dim);">All Markets</div></div><div class="fs-cnt">2,400</div></div>
+        <div class="farr" style="padding-left:100px;">↓</div>
+        <div class="funnel-stage"><div class="fs-lbl">TAL / ICP Match</div><div class="fs-wrap"><div class="fs-bar" style="width:88%;background:rgba(59,130,246,.15);color:var(--low);">ICP Filtered</div></div><div class="fs-cnt">423</div></div>
+        <div class="farr" style="padding-left:100px;">↓</div>
+        <div class="funnel-stage"><div class="fs-lbl">Scored Accounts</div><div class="fs-wrap"><div class="fs-bar" style="width:65%;background:rgba(59,130,246,.1);color:var(--low);">With Score</div></div><div class="fs-cnt">139</div></div>
+        <div class="farr" style="padding-left:100px;">↓</div>
+        <div class="funnel-stage"><div class="fs-lbl">Medium Intent</div><div class="fs-wrap"><div class="fs-bar" style="width:30%;background:var(--mid-glow);color:var(--mid);">SDR Nurture</div></div><div class="fs-cnt">34</div></div>
+        <div class="farr" style="padding-left:100px;">↓</div>
+        <div class="funnel-stage"><div class="fs-lbl">High Intent</div><div class="fs-wrap"><div class="fs-bar" style="width:14%;background:var(--high-glow);color:var(--high);">Sales Queue</div></div><div class="fs-cnt">18</div></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="ptitle">Channel → Intent Quality</div>
+      <div class="bchart">
+        <div class="bc-row"><div class="bc-lbl">Bombora</div><div class="bc-track"><div class="bc-fill" style="width:92%;background:#a855f7;"></div></div><div class="bc-val" style="color:#a855f7;">38%</div></div>
+        <div class="bc-row"><div class="bc-lbl">G2 / Capterra</div><div class="bc-track"><div class="bc-fill" style="width:78%;background:#f87171;"></div></div><div class="bc-val" style="color:#f87171;">32%</div></div>
+        <div class="bc-row"><div class="bc-lbl">ZoomInfo</div><div class="bc-track"><div class="bc-fill" style="width:68%;background:#fbbf24;"></div></div><div class="bc-val" style="color:#fbbf24;">28%</div></div>
+        <div class="bc-row"><div class="bc-lbl">Apollo.io</div><div class="bc-track"><div class="bc-fill" style="width:58%;background:#22d3ee;"></div></div><div class="bc-val" style="color:#22d3ee;">24%</div></div>
+        <div class="bc-row"><div class="bc-lbl">LinkedIn Intent</div><div class="bc-track"><div class="bc-fill" style="width:45%;background:#60a5fa;"></div></div><div class="bc-val" style="color:#60a5fa;">18%</div></div>
+        <div class="bc-row"><div class="bc-lbl">Clutch / IndiaMart</div><div class="bc-track"><div class="bc-fill" style="width:32%;background:#fb923c;"></div></div><div class="bc-val" style="color:#fb923c;">13%</div></div>
+      </div>
+      <div style="margin-top:1rem;padding:.75rem;background:var(--surface2);border-radius:7px;border:1px solid var(--border);">
+        <div style="font-family:var(--fm);font-size:.58rem;color:var(--green);margin-bottom:.3rem;letter-spacing:.1em;">💡 INSIGHT</div>
+        <div style="font-size:.75rem;color:var(--text-mid);">Bombora has the highest high-intent conversion rate. Prioritise budget here. G2 profile needs more reviews to unlock full intent data.</div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="ptitle">Intent by Industry</div>
+      <div class="bchart">
+        <div class="bc-row"><div class="bc-lbl">FMCG / D2C</div><div class="bc-track"><div class="bc-fill" style="width:88%;background:var(--high);"></div></div><div class="bc-val">32</div></div>
+        <div class="bc-row"><div class="bc-lbl">Technology / SaaS</div><div class="bc-track"><div class="bc-fill" style="width:72%;background:var(--high);"></div></div><div class="bc-val">26</div></div>
+        <div class="bc-row"><div class="bc-lbl">BFSI</div><div class="bc-track"><div class="bc-fill" style="width:55%;background:var(--mid);"></div></div><div class="bc-val">20</div></div>
+        <div class="bc-row"><div class="bc-lbl">Pharma / Healthcare</div><div class="bc-track"><div class="bc-fill" style="width:44%;background:var(--mid);"></div></div><div class="bc-val">16</div></div>
+        <div class="bc-row"><div class="bc-lbl">Retail / E-commerce</div><div class="bc-track"><div class="bc-fill" style="width:36%;background:var(--low);"></div></div><div class="bc-val">13</div></div>
+        <div class="bc-row"><div class="bc-lbl">Manufacturing</div><div class="bc-track"><div class="bc-fill" style="width:22%;background:var(--low);"></div></div><div class="bc-val">8</div></div>
+      </div>
+      <div style="margin-top:1rem;">
+        <div class="ptitle" style="margin-bottom:.6rem;">Retargeting Audiences Built</div>
+        <div style="display:flex;flex-wrap:wrap;gap:.4rem;">
+          <span style="font-size:.7rem;padding:.3rem .65rem;border-radius:5px;background:var(--surface2);border:1px solid var(--border);color:var(--text-mid);">High Intent · 18</span>
+          <span style="font-size:.7rem;padding:.3rem .65rem;border-radius:5px;background:var(--surface2);border:1px solid var(--border);color:var(--text-mid);">FMCG Segment · 32</span>
+          <span style="font-size:.7rem;padding:.3rem .65rem;border-radius:5px;background:var(--surface2);border:1px solid var(--border);color:var(--text-mid);">Tech Companies · 26</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- HOW IT WORKS -->
+<div id="view-howit" class="view-panel">
+<div class="main">
+  <div style="margin-bottom:2rem;">
+    <div style="font-family:var(--fd);font-size:2.5rem;letter-spacing:2px;margin-bottom:.3rem;">HOW 3RD PARTY INTENT <span style="color:var(--high);">WORKS</span></div>
+    <div style="font-size:.88rem;color:var(--text-dim);max-width:700px;font-weight:300;line-height:1.7;">A complete explanation of what 3rd party intent data is, how it's collected, and exactly how Younion uses it to find companies ready to buy — before they contact you.</div>
+  </div>
+  <div class="ec-grid">
+    <div class="ec"><div class="ec-icon">🌐</div><h3>What Is 3rd Party Intent?</h3><p>External platforms like Bombora, G2 and ZoomInfo track browsing behaviour across thousands of B2B websites and review platforms. When employees at a company repeatedly research topics like "event management agency" or "brand activation", these platforms record it as a buying signal — even before they visit younion.live.</p></div>
+    <div class="ec"><div class="ec-icon">📡</div><h3>How Signals Are Collected</h3><p>Bombora runs a co-op of 5,000+ B2B publisher websites. When someone from Tata Consumer reads 3+ articles about "experiential marketing" in 2 weeks, Bombora records a topic surge for that company domain. G2 tracks when companies compare you vs competitors. Signals are anonymised at person level but identifiable at company (domain) level.</p></div>
+    <div class="ec"><div class="ec-icon">⚡</div><h3>Why It Works for Younion</h3><p>80% of the B2B buying journey happens before a buyer ever contacts a vendor. By the time someone fills your contact form, they've already shortlisted vendors. 3rd party intent lets Younion's sales team enter the journey early — when prospects are still researching — giving a 3–4 week head start on competitors.</p></div>
+  </div>
+
+  <div style="font-family:var(--fm);font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--text-dim);margin-bottom:1rem;">The Signal Pipeline — Step by Step</div>
+  <div class="proc-flow">
+    <div class="pf-step"><div class="pf-num">1</div><div class="pf-tit">Buyer Researches</div><div class="pf-des">CMO at Hindustan Unilever reads articles about "B2B event agencies India" across multiple sites over 2 weeks</div></div>
+    <div class="pf-arr">→</div>
+    <div class="pf-step"><div class="pf-num">2</div><div class="pf-tit">Platform Detects</div><div class="pf-des">Bombora detects topic surge for HUL domain. G2 records HUL employees comparing event agencies on review platform.</div></div>
+    <div class="pf-arr">→</div>
+    <div class="pf-step"><div class="pf-num">3</div><div class="pf-tit">Signal Exported</div><div class="pf-des">Bombora sends weekly surge CSV. G2 flags HUL in your buyer intent dashboard with comparison data.</div></div>
+    <div class="pf-arr">→</div>
+    <div class="pf-step"><div class="pf-num">4</div><div class="pf-tit">Score Calculated</div><div class="pf-des">Bombora high surge (+35) + G2 comparison (+30) + LinkedIn engage (+15) = 80 points → High Intent</div></div>
+    <div class="pf-arr">→</div>
+    <div class="pf-step"><div class="pf-num">5</div><div class="pf-tit">CRM Alerted</div><div class="pf-des">HubSpot creates/updates HUL record. SDR gets Slack notification. Email sequence auto-starts.</div></div>
+    <div class="pf-arr">→</div>
+    <div class="pf-step"><div class="pf-num">6</div><div class="pf-tit">Sales Acts</div><div class="pf-des">SDR calls HUL within 4 hours, referencing their exact research topic. Meeting booked within 48 hours.</div></div>
+  </div>
+
+  <div style="font-family:var(--fm);font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--text-dim);margin:2rem 0 1rem;">Each Source Explained</div>
+  <div class="grid-3">
+    <div class="panel" style="border-left:3px solid #a855f7;"><div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.75rem;"><span style="font-size:1.2rem;">🌊</span><strong style="color:#a855f7;">Bombora</strong></div><p style="font-size:.78rem;color:var(--text-mid);line-height:1.6;margin-bottom:.75rem;">Tracks 5,000+ B2B websites. You upload your "Surge Topics" (e.g., "experiential marketing") and get weekly alerts when any company in your Target Account List spikes on those topics. Best for early-stage research signals.</p><div style="font-family:var(--fm);font-size:.62rem;color:var(--text-dim);">Setup: Upload TAL → Define topics → Get weekly CSV → Push to CRM</div></div>
+    <div class="panel" style="border-left:3px solid #f87171;"><div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.75rem;"><span style="font-size:1.2rem;">⭐</span><strong style="color:#f87171;">G2 / Capterra</strong></div><p style="font-size:.78rem;color:var(--text-mid);line-height:1.6;margin-bottom:.75rem;">Shows which companies viewed Younion's profile, compared you to competitors, or read your reviews. This is the highest-quality signal because the buyer was actively evaluating vendors — not just browsing content.</p><div style="font-family:var(--fm);font-size:.62rem;color:var(--text-dim);">Setup: Claim G2 profile → Enable intent add-on → Connect to HubSpot → Done</div></div>
+    <div class="panel" style="border-left:3px solid #22d3ee;"><div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.75rem;"><span style="font-size:1.2rem;">🚀</span><strong style="color:#22d3ee;">Apollo.io</strong></div><p style="font-size:.78rem;color:var(--text-mid);line-height:1.6;margin-bottom:.75rem;">B2B contact database with intent flags. Search decision-makers (CMOs, Marketing Heads) at ICP companies, filter by "recently changed job" or "hiring for marketing" signals, and export to CRM in one click. Free tier is excellent to start.</p><div style="font-family:var(--fm);font-size:.62rem;color:var(--text-dim);">Setup: Sign up free → Set ICP filters → Export 100 contacts/month free</div></div>
+    <div class="panel" style="border-left:3px solid #fbbf24;"><div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.75rem;"><span style="font-size:1.2rem;">🔭</span><strong style="color:#fbbf24;">ZoomInfo</strong></div><p style="font-size:.78rem;color:var(--text-mid);line-height:1.6;margin-bottom:.75rem;">Enterprise B2B intelligence with intent signals tracked across a large publisher network, overlaid with company firmographic data (revenue, headcount, tech stack). Run a 14-day free trial before committing.</p><div style="font-family:var(--fm);font-size:.62rem;color:var(--text-dim);">Setup: Request trial → Upload TAL → Define intent topics → Weekly report</div></div>
+    <div class="panel" style="border-left:3px solid #60a5fa;"><div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.75rem;"><span style="font-size:1.2rem;">💼</span><strong style="color:#60a5fa;">LinkedIn Intent</strong></div><p style="font-size:.78rem;color:var(--text-mid);line-height:1.6;margin-bottom:.75rem;">Company page analytics shows who viewed your page. Sales Navigator shows which decision-makers viewed your team profiles. Matched Audiences let you retarget your TAL. One of the richest signals for India B2B.</p><div style="font-family:var(--fm);font-size:.62rem;color:var(--text-dim);">Setup: Admin access → Company Page Analytics → Sales Nav profile view tracking</div></div>
+    <div class="panel" style="border-left:3px solid #fb923c;"><div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.75rem;"><span style="font-size:1.2rem;">🏆</span><strong style="color:#fb923c;">Clutch / IndiaMart</strong></div><p style="font-size:.78rem;color:var(--text-mid);line-height:1.6;margin-bottom:.75rem;">India-specific B2B directories. Companies searching "event management agency Bangalore" on these platforms are actively shortlisting vendors — highly commercial, high-intent signal. Free listing available immediately.</p><div style="font-family:var(--fm);font-size:.62rem;color:var(--text-dim);">Setup: List on Clutch.co free → Add case studies → Monitor enquiries daily</div></div>
+  </div>
+</div>
+</div>
+
+<!-- SAMPLE DATA -->
+<div id="view-dataset" class="view-panel">
+<div class="main">
+  <div style="margin-bottom:1.5rem;">
+    <div style="font-family:var(--fd);font-size:2.5rem;letter-spacing:2px;margin-bottom:.3rem;">SAMPLE <span style="color:var(--high);">DATASET</span></div>
+    <div style="font-size:.85rem;color:var(--text-dim);font-weight:300;line-height:1.7;max-width:700px;">This is exactly what your raw 3rd party intent data looks like — the kind of CSV/table you receive from Bombora, G2, and Apollo every week. This is the input to your scoring model.</div>
+  </div>
+  <div class="panel" style="margin-bottom:1rem;">
+    <div class="ptitle">Raw 3rd Party Intent Data — Weekly Export (Sample · 20 Records)</div>
+    <div class="data-sample"><table class="dstable" id="sampleTable"></table></div>
+  </div>
+  <div class="grid-3" style="margin-bottom:1rem;">
+    <div class="panel">
+      <div class="ptitle">Scoring Model</div>
+      <table style="width:100%;border-collapse:collapse;font-size:.75rem;">
+        <tr style="border-bottom:1px solid var(--border);"><th style="font-family:var(--fm);font-size:.55rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);text-align:left;padding:0 .5rem .6rem;">Signal from 3rd Party Source</th><th style="font-family:var(--fm);font-size:.55rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);text-align:right;padding:0 .5rem .6rem;">Points</th></tr>
+        <tr style="border-bottom:1px solid rgba(30,45,66,.3);"><td style="padding:.45rem .5rem;color:var(--text-mid);">Bombora High Surge (70%+)</td><td style="padding:.45rem .5rem;text-align:right;font-family:var(--fm);color:var(--high);">+35</td></tr>
+        <tr style="border-bottom:1px solid rgba(30,45,66,.3);"><td style="padding:.45rem .5rem;color:var(--text-mid);">Bombora Moderate Surge (40–69%)</td><td style="padding:.45rem .5rem;text-align:right;font-family:var(--fm);color:var(--mid);">+20</td></tr>
+        <tr style="border-bottom:1px solid rgba(30,45,66,.3);"><td style="padding:.45rem .5rem;color:var(--text-mid);">G2 Vendor Comparison</td><td style="padding:.45rem .5rem;text-align:right;font-family:var(--fm);color:var(--high);">+30</td></tr>
+        <tr style="border-bottom:1px solid rgba(30,45,66,.3);"><td style="padding:.45rem .5rem;color:var(--text-mid);">G2 Profile Viewed</td><td style="padding:.45rem .5rem;text-align:right;font-family:var(--fm);color:var(--mid);">+20</td></tr>
+        <tr style="border-bottom:1px solid rgba(30,45,66,.3);"><td style="padding:.45rem .5rem;color:var(--text-mid);">Apollo Intent Flag</td><td style="padding:.45rem .5rem;text-align:right;font-family:var(--fm);color:var(--mid);">+15</td></tr>
+        <tr style="border-bottom:1px solid rgba(30,45,66,.3);"><td style="padding:.45rem .5rem;color:var(--text-mid);">ZoomInfo In-Market Signal</td><td style="padding:.45rem .5rem;text-align:right;font-family:var(--fm);color:var(--mid);">+20</td></tr>
+        <tr style="border-bottom:1px solid rgba(30,45,66,.3);"><td style="padding:.45rem .5rem;color:var(--text-mid);">LinkedIn Engagement (TAL)</td><td style="padding:.45rem .5rem;text-align:right;font-family:var(--fm);color:var(--low);">+15</td></tr>
+        <tr><td style="padding:.45rem .5rem;color:var(--text-mid);">Clutch / IndiaMart Enquiry</td><td style="padding:.45rem .5rem;text-align:right;font-family:var(--fm);color:var(--low);">+10</td></tr>
+      </table>
+    </div>
+    <div class="panel">
+      <div class="ptitle">Intent Thresholds</div>
+      <div style="display:flex;flex-direction:column;gap:.75rem;margin-top:.25rem;">
+        <div style="background:var(--high-glow);border:1px solid rgba(249,115,22,.25);border-radius:8px;padding:1rem;"><div style="font-family:var(--fd);font-size:1.8rem;color:var(--high);line-height:1;">60+ Points</div><div style="font-size:.75rem;color:var(--text-mid);margin-top:.3rem;">🔴 HIGH INTENT — Sales calls within 4 hours. Personalised outreach referencing exact research topic. CRM task auto-created.</div></div>
+        <div style="background:var(--mid-glow);border:1px solid rgba(234,179,8,.25);border-radius:8px;padding:1rem;"><div style="font-family:var(--fd);font-size:1.8rem;color:var(--mid);line-height:1;">25–59 Points</div><div style="font-size:.75rem;color:var(--text-mid);margin-top:.3rem;">🟡 MEDIUM — SDR 5-touch nurture sequence. LinkedIn connect. Retargeting ads. Re-evaluate in 2 weeks.</div></div>
+        <div style="background:var(--low-glow);border:1px solid rgba(59,130,246,.25);border-radius:8px;padding:1rem;"><div style="font-family:var(--fd);font-size:1.8rem;color:var(--low);line-height:1;">&lt;25 Points</div><div style="font-size:.75rem;color:var(--text-mid);margin-top:.3rem;">🔵 LOW — Marketing only. Newsletter, content, awareness ads. Do not call yet.</div></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="ptitle">How to Get This Data · Free-First Approach</div>
+      <div style="display:flex;flex-direction:column;gap:.6rem;">
+        <div style="padding:.75rem;background:var(--surface2);border-radius:7px;border:1px solid var(--border);"><div style="font-size:.72rem;font-weight:600;margin-bottom:.2rem;color:var(--green);">Day 1 — Free (Today)</div><div style="font-size:.72rem;color:var(--text-mid);">Claim G2.com profile → Intent data on profile views. Sign up Apollo.io → 100 contacts/month free. List on Clutch.co → free profile + enquiry alerts.</div></div>
+        <div style="padding:.75rem;background:var(--surface2);border-radius:7px;border:1px solid var(--border);"><div style="font-size:.72rem;font-weight:600;margin-bottom:.2rem;color:var(--mid);">Week 2 — Trial</div><div style="font-size:.72rem;color:var(--text-mid);">ZoomInfo free 14-day trial. LinkedIn Sales Navigator free trial (30 days). Clearbit free tier for company identification.</div></div>
+        <div style="padding:.75rem;background:var(--surface2);border-radius:7px;border:1px solid var(--border);"><div style="font-size:.72rem;font-weight:600;margin-bottom:.2rem;color:var(--high);">Week 4 — Paid (After Validating)</div><div style="font-size:.72rem;color:var(--text-mid);">Bombora via HubSpot integration (~$500/mo). ZoomInfo Intent full plan. Decide based on trial quality.</div></div>
+        <div style="padding:.75rem;background:var(--surface2);border-radius:7px;border:1px solid var(--border);"><div style="font-size:.72rem;font-weight:600;margin-bottom:.2rem;color:var(--low);">Ongoing — Automate</div><div style="font-size:.72rem;color:var(--text-mid);">Zapier (free) connects all → Google Sheets scoring → HubSpot CRM → Slack daily digest at 9am.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-ov" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<script>
+const accounts=[
+  {id:1,company:"Hindustan Unilever",domain:"hul.com",industry:"FMCG",avatar:"HU",bg:"#f97316",contact:"Priya Sharma, CMO",score:88,level:"high",topics:["B2B Events","Brand Activation","Experiential Mktg"],sources:["bombora","g2","linkedin"],lastSignal:"2h ago",signals:[{date:"Feb 26",src:"🌊 Bombora",text:"High surge: 'experiential marketing India' — 6 employees researching over 2 weeks"},{date:"Feb 25",src:"⭐ G2",text:"Compared Younion vs 2 competitor event agencies on G2"},{date:"Feb 24",src:"💼 LinkedIn",text:"CMO Priya Sharma viewed Younion company page"}]},
+  {id:2,company:"Tata Consumer",domain:"tataconsumer.com",industry:"FMCG",avatar:"TC",bg:"#3b82f6",contact:"Rahul Mehta, Marketing Head",score:79,level:"high",topics:["Brand Campaign","Event Mgmt"],sources:["bombora","zoominfo"],lastSignal:"4h ago",signals:[{date:"Feb 26",src:"🌊 Bombora",text:"Moderate-high surge: 'brand activation agency' — 4 employees"},{date:"Feb 25",src:"🔭 ZoomInfo",text:"In-market signal detected for event management services"}]},
+  {id:3,company:"PharmEasy",domain:"pharmeasy.in",industry:"Pharma",avatar:"PE",bg:"#22c55e",contact:"Aditya Rao, Marketing Dir",score:74,level:"high",topics:["Corporate Events","B2B Marketing"],sources:["g2","apollo","clutch"],lastSignal:"1h ago",signals:[{date:"Feb 26",src:"⭐ G2",text:"Viewed Younion profile and compared event management vendors"},{date:"Feb 25",src:"🚀 Apollo",text:"Marketing Director flagged as intent-active"},{date:"Feb 24",src:"🏆 Clutch",text:"Searched 'event management Bangalore'"}]},
+  {id:4,company:"HDFC Bank",domain:"hdfcbank.com",industry:"BFSI",avatar:"HB",bg:"#eab308",contact:"Neha Kapoor, Brand Head",score:67,level:"high",topics:["Brand Experience","Corporate Events"],sources:["bombora","linkedin"],lastSignal:"6h ago",signals:[{date:"Feb 25",src:"🌊 Bombora",text:"High surge: 'B2B event agency India'"},{date:"Feb 24",src:"💼 LinkedIn",text:"Brand Head engaged with Younion post on brand activation"}]},
+  {id:5,company:"Marico Limited",domain:"marico.com",industry:"FMCG",avatar:"ML",bg:"#f97316",contact:"Sanjay Iyer, CMO",score:64,level:"high",topics:["Experiential Marketing"],sources:["g2","zoominfo"],lastSignal:"3h ago",signals:[{date:"Feb 26",src:"⭐ G2",text:"Profile viewed twice this week"},{date:"Feb 25",src:"🔭 ZoomInfo",text:"In-market signal: experiential marketing agency"}]},
+  {id:6,company:"Swiggy",domain:"swiggy.com",industry:"Tech/D2C",avatar:"SW",bg:"#f97316",contact:"Divya Nair, Growth Head",score:52,level:"mid",topics:["Brand Campaigns","Events"],sources:["apollo","linkedin"],lastSignal:"1d ago",signals:[{date:"Feb 25",src:"🚀 Apollo",text:"Company actively hiring event coordinator — strong intent signal"},{date:"Feb 24",src:"💼 LinkedIn",text:"Engaged with Younion post about brand campaigns"}]},
+  {id:7,company:"Bajaj Finance",domain:"bajajfinserv.in",industry:"BFSI",avatar:"BF",bg:"#3b82f6",contact:"Vikram Shah, Mktg Dir",score:48,level:"mid",topics:["B2B Events"],sources:["bombora"],lastSignal:"2d ago",signals:[{date:"Feb 24",src:"🌊 Bombora",text:"Moderate surge: 'corporate event management' — 2 employees over 10 days"}]},
+  {id:8,company:"Nykaa",domain:"nykaa.com",industry:"Retail",avatar:"NK",bg:"#ec4899",contact:"Pooja Gupta, Brand Manager",score:44,level:"mid",topics:["Brand Activation"],sources:["g2","clutch"],lastSignal:"1d ago",signals:[{date:"Feb 25",src:"⭐ G2",text:"Viewed Younion G2 profile"},{date:"Feb 23",src:"🏆 Clutch",text:"Searched brand activation agencies"}]},
+  {id:9,company:"Zomato",domain:"zomato.com",industry:"Tech",avatar:"ZO",bg:"#ef4444",contact:"Arjun Bose, Marketing Lead",score:38,level:"mid",topics:["Event Management"],sources:["apollo"],lastSignal:"3d ago",signals:[{date:"Feb 23",src:"🚀 Apollo",text:"Contact flagged as in-market for event management"}]},
+  {id:10,company:"ICICI Bank",domain:"icicibank.com",industry:"BFSI",avatar:"IC",bg:"#b45309",contact:"Rohan Verma, Mktg Head",score:18,level:"low",topics:["Corporate Events"],sources:["bombora"],lastSignal:"1w ago",signals:[{date:"Feb 19",src:"🌊 Bombora",text:"Low surge: 'corporate events' — 1 employee"}]},
+];
+
+const signals=[
+  {icon:"🌊",cls:"si-bo",company:"Hindustan Unilever",detail:"Bombora surge: 'experiential marketing India' — 6 employees actively researching over 2 weeks",time:"2 min ago"},
+  {icon:"⭐",cls:"si-g2",company:"PharmEasy",detail:"Viewed Younion G2 profile and compared 3 event agency vendors",time:"18 min ago"},
+  {icon:"🚀",cls:"si-ap",company:"Swiggy",detail:"Apollo flagged 2 marketing contacts as intent-active — job posting for event coordinator",time:"34 min ago"},
+  {icon:"🔭",cls:"si-zi",company:"Tata Consumer",detail:"ZoomInfo in-market signal: brand activation agency search detected",time:"1h ago"},
+  {icon:"💼",cls:"si-li",company:"HDFC Bank",detail:"Brand Head viewed Younion company page and liked brand activation post",time:"2h ago"},
+  {icon:"🏆",cls:"si-cl",company:"Nykaa",detail:"Searched 'experiential marketing Bangalore' on Clutch.co — shortlisting vendors",time:"3h ago"},
+];
+
+const sampleRows=[
+  ["Hindustan Unilever","hul.com","FMCG","Bombora","B2B Event Management","High (82%)","6","Feb 26","CMO, Mktg Director","88"],
+  ["Tata Consumer Products","tataconsumer.com","FMCG","Bombora + ZoomInfo","Brand Activation Agency","Moderate (58%)","4","Feb 25","Marketing Head","55"],
+  ["PharmEasy","pharmeasy.in","Pharma","G2 + Apollo + Clutch","Event Mgmt, B2B Mktg","High - Comparison","3","Feb 26","Marketing Director","65"],
+  ["HDFC Bank","hdfcbank.com","BFSI","Bombora + LinkedIn","Corporate Events","High (71%)","3","Feb 25","Brand Head","50"],
+  ["Marico","marico.com","FMCG","G2 + ZoomInfo","Experiential Marketing","Profile Viewed 2x","2","Feb 26","CMO","44"],
+  ["Swiggy","swiggy.com","Tech/D2C","Apollo + LinkedIn","Brand Campaigns","Intent + Job Flag","2","Feb 25","Growth Head","37"],
+  ["Bajaj Finance","bajajfinserv.in","BFSI","Bombora","Corporate Event Mgmt","Moderate (44%)","2","Feb 24","Marketing Director","20"],
+  ["Nykaa","nykaa.com","Retail","G2 + Clutch","Brand Activation","Profile + Directory","2","Feb 25","Brand Manager","44"],
+  ["Zomato","zomato.com","Tech","Apollo","Event Management","Intent Flagged","1","Feb 23","Marketing Lead","15"],
+  ["Godrej Consumer","godrejcp.com","FMCG","LinkedIn","Brand Activation","Page View + Engage","1","Feb 24","VP Marketing","15"],
+  ["Asian Paints","asianpaints.com","Manufacturing","Bombora","B2B Marketing","Low (28%)","1","Feb 22","Mktg Manager","20"],
+  ["Biocon","biocon.com","Pharma","Apollo","Event Management","Intent Flagged","1","Feb 21","Comms Head","15"],
+  ["Myntra","myntra.com","Retail","G2","Brand Experience","Profile Viewed","1","Feb 24","Brand Head","20"],
+  ["PVR Inox","pvrinox.com","Entertainment","ZoomInfo","Corporate Events","In-Market Signal","1","Feb 22","Marketing VP","20"],
+  ["Lenskart","lenskart.com","Retail","LinkedIn + Clutch","Brand Campaigns","Engaged + Listed","2","Feb 25","Growth Mktg","25"],
+  ["ICICI Bank","icicibank.com","BFSI","Bombora","Corporate Events","Low (18%)","1","Feb 19","Marketing Head","20"],
+  ["Wipro","wipro.com","Tech","Apollo","B2B Marketing","Intent Flagged","1","Feb 20","Marketing Dir","15"],
+  ["Piramal Group","piramal.com","Pharma","ZoomInfo","Brand Activation","Low Signal","1","Feb 18","CMO","20"],
+  ["Manyavar","manyavar.com","Retail","G2","Event Management","Profile Viewed","1","Feb 21","Brand Manager","20"],
+  ["Reliance Retail","relianceretail.com","Retail","LinkedIn","Brand Campaigns","Followed Page","1","Feb 18","Brand Director","15"],
+];
+
+const srcData=[
+  {icon:"🌊",cls:"si-bo",name:"Bombora",type:"Intent Data Network",statColor:"#a855f7",stat:"47",sub:"Companies surging on your topics",h:18,hpct:60,m:29,mpct:100},
+  {icon:"⭐",cls:"si-g2",name:"G2 / Capterra",type:"Review Platform Intent",statColor:"#f87171",stat:"23",sub:"Companies viewed Younion profile",h:11,hpct:48,m:23,mpct:100},
+  {icon:"🚀",cls:"si-ap",name:"Apollo.io",type:"Contact + Intent Data",statColor:"#22d3ee",stat:"31",sub:"Intent-flagged contacts found",h:22,hpct:71,m:31,mpct:100},
+  {icon:"🔭",cls:"si-zi",name:"ZoomInfo",type:"B2B Intelligence",statColor:"#fbbf24",stat:"19",sub:"In-market signals detected",h:7,hpct:37,m:19,mpct:100},
+  {icon:"💼",cls:"si-li",name:"LinkedIn Intent",type:"Professional Network",statColor:"#60a5fa",stat:"28",sub:"Decision-makers engaged",h:18,hpct:64,m:28,mpct:100},
+  {icon:"🏆",cls:"si-cl",name:"Clutch / IndiaMart",type:"Directory Intent",statColor:"#fb923c",stat:"14",sub:"Directory profile visitors",h:6,hpct:43,m:14,mpct:100},
+];
+
+const topics=[
+  {name:"B2B Event Management",pct:92,val:"+92%"},
+  {name:"Experiential Marketing",pct:78,val:"+78%"},
+  {name:"Brand Activation Agency",pct:71,val:"+71%"},
+  {name:"Corporate Event Bangalore",pct:65,val:"+65%"},
+  {name:"Marketing Agency India",pct:54,val:"+54%"},
+  {name:"Digital + On-ground Campaign",pct:47,val:"+47%"},
+];
+
+function renderAll(){
+  // Accounts
+  document.getElementById('accountsBody').innerHTML=accounts.map(a=>{
+    const sc=a.level==='high'?'var(--high)':a.level==='mid'?'var(--mid)':'var(--low)';
+    const bc=a.level==='high'?'ib-h':a.level==='mid'?'ib-m':'ib-l';
+    const bt=a.level==='high'?'🔴 High':a.level==='mid'?'🟡 Medium':'🔵 Low';
+    const ac=a.level==='high'?'ab-call':a.level==='mid'?'ab-nurture':'ab-watch';
+    const at=a.level==='high'?'Call Now':a.level==='mid'?'Nurture':'Watch';
+    const stags=a.sources.map(s=>`<span class="stag st-${s}">${s}</span>`).join('');
+    return `<tr onclick="openModal(${a.id})">
+      <td><div class="co-cell"><div class="co-av" style="background:${a.bg}22;color:${a.bg};border:1px solid ${a.bg}33;">${a.avatar}</div><div><div class="co-name">${a.company}</div><div class="co-dom">${a.domain}</div></div></div></td>
+      <td><div class="sc-cell"><div class="sc-num" style="color:${sc};">${a.score}</div><div class="sc-bg"><div class="sc-fill" style="width:${a.score}%;background:${sc};"></div></div></div></td>
+      <td><span class="ibadge ${bc}">${bt}</span></td>
+      <td><div style="font-size:.72rem;color:var(--text-mid);">${a.topics.slice(0,2).join(', ')}</div></td>
+      <td><div class="stags">${stags}</div></td>
+      <td><button class="abtn ${ac}" onclick="event.stopPropagation();">${at}</button></td>
+    </tr>`;
+  }).join('');
+
+  // Sales body
+  if(document.getElementById('salesBody')){
+    document.getElementById('salesBody').innerHTML=accounts.filter(a=>a.level!=='low').map(a=>{
+      const sc=a.level==='high'?'var(--high)':'var(--mid)';
+      const ac=a.level==='high'?'ab-call':'ab-nurture';
+      const at=a.level==='high'?'📞 Call Now':'✉️ Nurture';
+      return `<tr onclick="openModal(${a.id})">
+        <td><div class="co-cell"><div class="co-av" style="background:${a.bg}22;color:${a.bg};border:1px solid ${a.bg}33;">${a.avatar}</div><div><div class="co-name">${a.company}</div><div class="co-dom">${a.industry}</div></div></div></td>
+        <td style="font-family:var(--fd);font-size:1.5rem;color:${sc};">${a.score}</td>
+        <td style="font-size:.7rem;color:var(--text-mid);max-width:200px;">${a.signals[0].src}: ${a.signals[0].text.substring(0,65)}...</td>
+        <td style="font-size:.75rem;">${a.contact}</td>
+        <td style="font-family:var(--fm);font-size:.65rem;color:var(--text-dim);">${a.lastSignal}</td>
+        <td><button class="abtn ${ac}" onclick="event.stopPropagation();">${at}</button></td>
+      </tr>`;
+    }).join('');
+  }
+
+  // Signal feed
+  document.getElementById('signalFeed').innerHTML=signals.map(s=>`
+    <div class="sitem"><div class="sicon ${s.cls}">${s.icon}</div>
+    <div class="sbody"><div class="sco">${s.company}</div><div class="sdet">${s.detail}</div><div class="stime">${s.time}</div></div></div>`).join('');
+
+  // Topic surge
+  document.getElementById('topicSurge').innerHTML=topics.map(t=>`
+    <div class="topic-row"><span class="topic-name">${t.name}</span><div class="surge-bar"><div class="surge-fill" style="width:${t.pct}%"></div></div><span class="surge-val">${t.val}</span></div>`).join('');
+
+  // Source grid
+  document.getElementById('sourceGrid').innerHTML=srcData.map(s=>`
+    <div class="sc-card">
+      <div class="sc-hd"><div class="sicon ${s.cls}">${s.icon}</div><div><div class="sc-nm">${s.name}</div><div class="sc-tp">${s.type}</div></div></div>
+      <div class="sc-stat" style="color:${s.statColor};">${s.stat}</div>
+      <div class="sc-sub">${s.sub}</div>
+      <div style="margin-top:.75rem;">
+        <div class="bc-row" style="margin-bottom:.4rem;"><span style="font-size:.62rem;color:var(--text-dim);width:75px;">High Intent</span><div class="bc-track"><div class="bc-fill" style="width:${s.hpct}%;background:${s.statColor};"></div></div><span style="font-size:.62rem;color:var(--text-dim);width:22px;text-align:right;">${s.h}</span></div>
+        <div class="bc-row"><span style="font-size:.62rem;color:var(--text-dim);width:75px;">All Signals</span><div class="bc-track"><div class="bc-fill" style="width:100%;background:${s.statColor}33;"></div></div><span style="font-size:.62rem;color:var(--text-dim);width:22px;text-align:right;">${s.m}</span></div>
+      </div>
+    </div>`).join('');
+
+  // Sample data table
+  const hdrs=["Company","Domain","Industry","Source(s)","Intent Topic","Signal Strength","# Researching","Date","Decision Makers","Score"];
+  document.getElementById('sampleTable').innerHTML=`<thead><tr>${hdrs.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${sampleRows.map(r=>{
+    const sc=parseInt(r[9]);
+    const col=sc>=60?'var(--high)':sc>=25?'var(--mid)':'var(--text-dim)';
+    return `<tr>${r.map((c,j)=>j===9?`<td style="font-family:var(--fm);font-weight:600;color:${col};">${c}</td>`:`<td>${c}</td>`).join('')}</tr>`;
+  }).join('')}</tbody>`;
+}
+
+function openModal(id){
+  const a=accounts.find(x=>x.id===id);
+  if(!a) return;
+  const sc=a.level==='high'?'var(--high)':a.level==='mid'?'var(--mid)':'var(--low)';
+  const bc=a.level==='high'?'ib-h':a.level==='mid'?'ib-m':'ib-l';
+  const bt=a.level==='high'?'🔴 High Intent':a.level==='mid'?'🟡 Medium Intent':'🔵 Low Intent';
+  const na=a.level==='high'?'📞 Call within 4 hours · Reference exact research topic · Send relevant case study · Log in CRM':a.level==='mid'?'✉️ Add to 5-touch nurture sequence · LinkedIn connect + message · Enrol in retargeting ads':'📰 Marketing only — newsletter, content, awareness ads. Do not call yet.';
+  document.getElementById('modalContent').innerHTML=`
+    <div class="modal-hd"><div><div class="modal-t">${a.company}</div><div class="modal-s">${a.domain} · ${a.industry} · ${a.contact}</div></div>
+    <button class="mcls" onclick="closeModal()">✕</button></div>
+    <div style="display:flex;align-items:center;gap:1.5rem;margin-bottom:1.5rem;padding:1rem;background:var(--surface2);border-radius:8px;border:1px solid var(--border);">
+      <div style="text-align:center;"><div style="font-family:var(--fd);font-size:3.5rem;color:${sc};line-height:1;">${a.score}</div><div style="font-family:var(--fm);font-size:.55rem;color:var(--text-dim);letter-spacing:.1em;text-transform:uppercase;">Intent Score</div></div>
+      <div><span class="ibadge ${bc}" style="margin-bottom:.5rem;display:inline-flex;">${bt}</span>
+      <div style="font-size:.72rem;color:var(--text-mid);margin-bottom:.4rem;">Sources: ${a.sources.map(s=>`<span class="stag st-${s}" style="margin-right:.3rem;">${s}</span>`).join('')}</div>
+      <div style="font-size:.72rem;color:var(--text-dim);">Last signal: ${a.lastSignal}</div></div>
+    </div>
+    <div style="margin-bottom:1.25rem;"><div class="msec-t">Intent Signals Timeline</div>
+    ${a.signals.map(s=>`<div class="st-item"><div class="st-dot" style="background:var(--high);"></div><div><div class="st-txt"><strong>${s.src}</strong> — ${s.text}</div><div class="st-dt">${s.date}</div></div></div>`).join('')}</div>
+    <div style="margin-bottom:1.25rem;"><div class="msec-t">Surge Topics</div>
+    <div style="display:flex;flex-wrap:wrap;gap:.4rem;">${a.topics.map(t=>`<span style="font-size:.72rem;padding:.3rem .7rem;border-radius:5px;background:var(--high-glow);color:var(--high);border:1px solid rgba(249,115,22,.2);">${t}</span>`).join('')}</div></div>
+    <div><div class="msec-t">Recommended Next Action</div>
+    <div style="background:var(--surface2);border-radius:8px;padding:1rem;border:1px solid var(--border);font-size:.82rem;color:var(--text-mid);line-height:1.6;">${na}</div></div>`;
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal(){ document.getElementById('modal').classList.remove('open'); }
+
+function switchView(view,btn){
+  document.querySelectorAll('.view-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('view-'+view).classList.add('active');
+  btn.classList.add('active');
+}
+
+document.getElementById('dateBadge').textContent=new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+renderAll();
+</script>
+</body>
+</html>
