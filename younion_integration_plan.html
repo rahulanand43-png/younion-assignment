@@ -1,0 +1,1763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Younion · 3rd Party Intent Integration Plan</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600&family=Fira+Code:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream: #faf7f2;
+  --paper: #f0ebe1;
+  --ink: #1c1917;
+  --ink2: #44403c;
+  --ink3: #78716c;
+  --rule: #d6cfc4;
+  --rule2: #e8e0d5;
+  --red: #c2410c;
+  --red-bg: #fff7f5;
+  --amber: #b45309;
+  --amber-bg: #fffbf0;
+  --green: #15803d;
+  --green-bg: #f0fdf4;
+  --blue: #1d4ed8;
+  --blue-bg: #eff6ff;
+  --purple: #7c3aed;
+  --purple-bg: #f5f3ff;
+  --w: 900px;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--cream);
+  color: var(--ink);
+  font-family: 'DM Sans', sans-serif;
+  line-height: 1.6;
+}
+
+/* ── COVER ── */
+.cover {
+  background: var(--ink);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 4rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.cover-noise {
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+.cover-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  position: relative;
+}
+
+.cover-logo {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(250,247,242,0.4);
+}
+
+.cover-doc-num {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.65rem;
+  color: rgba(250,247,242,0.25);
+  letter-spacing: 0.1em;
+}
+
+.cover-main {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 4rem 0;
+}
+
+.cover-eyebrow {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--red);
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.cover-eyebrow::before {
+  content: '';
+  width: 32px;
+  height: 1px;
+  background: var(--red);
+}
+
+.cover h1 {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(3rem, 7vw, 6.5rem);
+  font-weight: 900;
+  line-height: 0.95;
+  letter-spacing: -2px;
+  color: var(--cream);
+  max-width: 800px;
+  margin-bottom: 2rem;
+}
+
+.cover h1 em {
+  font-style: italic;
+  color: rgba(250,247,242,0.35);
+}
+
+.cover-sub {
+  font-size: 1rem;
+  color: rgba(250,247,242,0.5);
+  max-width: 520px;
+  font-weight: 300;
+  line-height: 1.7;
+}
+
+.cover-bottom {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;
+  padding-top: 3rem;
+  border-top: 1px solid rgba(250,247,242,0.08);
+  position: relative;
+}
+
+.cover-stat label {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(250,247,242,0.3);
+  display: block;
+  margin-bottom: 0.4rem;
+}
+
+.cover-stat span {
+  font-family: 'Fraunces', serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: rgba(250,247,242,0.85);
+  line-height: 1;
+}
+
+.cover-stat p {
+  font-size: 0.72rem;
+  color: rgba(250,247,242,0.3);
+  margin-top: 0.2rem;
+}
+
+/* ── DOCUMENT BODY ── */
+.doc {
+  max-width: var(--w);
+  margin: 0 auto;
+  padding: 5rem 2rem;
+}
+
+/* ── SECTION HEADERS ── */
+.phase-marker {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin: 4rem 0 2.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid var(--ink);
+}
+
+.phase-num {
+  font-family: 'Fraunces', serif;
+  font-size: 5rem;
+  font-weight: 900;
+  line-height: 1;
+  color: var(--rule);
+  flex-shrink: 0;
+  width: 80px;
+}
+
+.phase-info h2 {
+  font-family: 'Fraunces', serif;
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  margin-bottom: 0.3rem;
+}
+
+.phase-tag {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--ink3);
+}
+
+/* ── ARCHITECTURE DIAGRAM ── */
+.arch-diagram {
+  background: var(--ink);
+  border-radius: 14px;
+  padding: 2.5rem;
+  margin: 2rem 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.arch-title {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(250,247,242,0.3);
+  margin-bottom: 2rem;
+}
+
+.arch-layers {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.arch-layer {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 1rem;
+  align-items: center;
+}
+
+.arch-layer-label {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-align: right;
+  color: rgba(250,247,242,0.3);
+  padding-right: 1rem;
+  border-right: 1px solid rgba(250,247,242,0.08);
+}
+
+.arch-layer-nodes {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.arch-node {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.62rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 5px;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.an-source { background: rgba(194,65,12,0.2); color: #fb923c; border: 1px solid rgba(194,65,12,0.3); }
+.an-collect { background: rgba(180,83,9,0.2); color: #fbbf24; border: 1px solid rgba(180,83,9,0.3); }
+.an-enrich { background: rgba(21,128,61,0.2); color: #4ade80; border: 1px solid rgba(21,128,61,0.3); }
+.an-store { background: rgba(29,78,216,0.2); color: #93c5fd; border: 1px solid rgba(29,78,216,0.3); }
+.an-score { background: rgba(124,58,237,0.2); color: #c4b5fd; border: 1px solid rgba(124,58,237,0.3); }
+.an-action { background: rgba(250,247,242,0.08); color: rgba(250,247,242,0.7); border: 1px solid rgba(250,247,242,0.12); }
+
+.arch-arrow {
+  text-align: center;
+  color: rgba(250,247,242,0.12);
+  font-size: 0.9rem;
+  padding: 0.1rem 0 0.1rem 134px;
+}
+
+/* ── STEP CARDS ── */
+.step-card {
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  margin: 1.5rem 0;
+  overflow: hidden;
+  background: white;
+}
+
+.step-header {
+  display: grid;
+  grid-template-columns: 64px 1fr auto;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--rule2);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.step-header:hover { background: var(--paper); }
+
+.step-num-box {
+  width: 40px; height: 40px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Fraunces', serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.sn-red { background: var(--red-bg); color: var(--red); border: 1px solid rgba(194,65,12,0.15); }
+.sn-amber { background: var(--amber-bg); color: var(--amber); border: 1px solid rgba(180,83,9,0.15); }
+.sn-green { background: var(--green-bg); color: var(--green); border: 1px solid rgba(21,128,61,0.15); }
+.sn-blue { background: var(--blue-bg); color: var(--blue); border: 1px solid rgba(29,78,216,0.15); }
+.sn-purple { background: var(--purple-bg); color: var(--purple); border: 1px solid rgba(124,58,237,0.15); }
+
+.step-header-info h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.15rem;
+}
+
+.step-header-info p {
+  font-size: 0.75rem;
+  color: var(--ink3);
+  font-weight: 300;
+}
+
+.step-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.3rem;
+}
+
+.step-week {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.55rem;
+  border-radius: 4px;
+  background: var(--paper);
+  color: var(--ink3);
+  border: 1px solid var(--rule);
+}
+
+.step-cost {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.05em;
+  color: var(--green);
+}
+
+.step-body {
+  padding: 1.5rem;
+}
+
+/* ── TASK LIST ── */
+.task-list { list-style: none; }
+
+.task-item {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--rule2);
+}
+
+.task-item:last-child { border: none; }
+
+.task-check {
+  width: 20px; height: 20px;
+  border-radius: 5px;
+  border: 2px solid var(--rule);
+  flex-shrink: 0;
+  margin-top: 1px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+}
+
+.task-check.done {
+  background: var(--green);
+  border-color: var(--green);
+  color: white;
+}
+
+.task-content { flex: 1; }
+
+.task-title {
+  font-size: 0.88rem;
+  font-weight: 500;
+  margin-bottom: 0.2rem;
+}
+
+.task-detail {
+  font-size: 0.78rem;
+  color: var(--ink3);
+  line-height: 1.6;
+  font-weight: 300;
+}
+
+.task-tool {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.58rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 3px;
+  background: var(--paper);
+  color: var(--ink2);
+  border: 1px solid var(--rule);
+  white-space: nowrap;
+  margin-top: 0.4rem;
+  display: inline-block;
+}
+
+.task-tool.free { background: var(--green-bg); color: var(--green); border-color: rgba(21,128,61,0.2); }
+.task-tool.paid { background: var(--red-bg); color: var(--red); border-color: rgba(194,65,12,0.2); }
+.task-tool.trial { background: var(--amber-bg); color: var(--amber); border-color: rgba(180,83,9,0.2); }
+
+/* ── CODE BLOCK ── */
+.code-block {
+  background: var(--ink);
+  border-radius: 8px;
+  padding: 1.25rem 1.5rem;
+  margin: 1rem 0;
+  overflow-x: auto;
+}
+
+.code-block .cb-label {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(250,247,242,0.25);
+  margin-bottom: 0.75rem;
+}
+
+.code-block pre {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.72rem;
+  line-height: 1.7;
+  color: rgba(250,247,242,0.75);
+  white-space: pre-wrap;
+}
+
+.code-block .kw { color: #fb923c; }
+.code-block .str { color: #4ade80; }
+.code-block .cm { color: rgba(250,247,242,0.25); font-style: italic; }
+.code-block .num { color: #93c5fd; }
+.code-block .fn { color: #c4b5fd; }
+
+/* ── INFO BOXES ── */
+.infobox {
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin: 1rem 0;
+  display: flex;
+  gap: 0.85rem;
+  align-items: flex-start;
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+
+.infobox.tip { background: var(--amber-bg); border: 1px solid rgba(180,83,9,0.15); }
+.infobox.warn { background: var(--red-bg); border: 1px solid rgba(194,65,12,0.15); }
+.infobox.good { background: var(--green-bg); border: 1px solid rgba(21,128,61,0.15); }
+.infobox.info { background: var(--blue-bg); border: 1px solid rgba(29,78,216,0.15); }
+.infobox .ib-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+.infobox .ib-text strong { display: block; font-size: 0.75rem; margin-bottom: 0.2rem; text-transform: uppercase; letter-spacing: 0.05em; }
+
+/* ── TWO COLUMN ── */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
+@media(max-width:640px) { .two-col { grid-template-columns: 1fr; } }
+
+.mini-box {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  padding: 1rem 1.1rem;
+}
+
+.mini-box h4 {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-bottom: 0.6rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.mini-box ul { list-style: none; }
+
+.mini-box li {
+  font-size: 0.8rem;
+  color: var(--ink2);
+  padding: 0.3rem 0;
+  border-bottom: 1px solid var(--rule2);
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  line-height: 1.4;
+}
+
+.mini-box li:last-child { border: none; }
+.mini-box li::before { content: '→'; color: var(--ink3); font-size: 0.7rem; flex-shrink: 0; padding-top: 1px; }
+
+/* ── ZAPIER FLOW ── */
+.zap-flow {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 1rem 0;
+}
+
+.zap-step {
+  display: flex;
+  gap: 1rem;
+  align-items: stretch;
+}
+
+.zap-line {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 36px;
+  flex-shrink: 0;
+}
+
+.zap-dot {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  flex-shrink: 0;
+  border: 2px solid;
+}
+
+.zap-connector {
+  width: 2px;
+  flex: 1;
+  background: var(--rule);
+  margin: 2px 0;
+}
+
+.zap-content {
+  flex: 1;
+  padding: 0.1rem 0 1.25rem;
+}
+
+.zap-label {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-bottom: 0.25rem;
+}
+
+.zap-title { font-size: 0.88rem; font-weight: 600; margin-bottom: 0.15rem; }
+.zap-desc { font-size: 0.78rem; color: var(--ink3); line-height: 1.5; font-weight: 300; }
+
+/* ── TOOL COMPARISON TABLE ── */
+.tool-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; margin: 1rem 0; }
+.tool-table th { font-family: 'Fira Code', monospace; font-size: 0.55rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink3); text-align: left; padding: 0.5rem 0.75rem; border-bottom: 2px solid var(--ink); }
+.tool-table td { padding: 0.7rem 0.75rem; border-bottom: 1px solid var(--rule2); vertical-align: middle; }
+.tool-table tr:last-child td { border: none; }
+.tool-table tr:hover td { background: var(--paper); }
+
+.badge {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.58rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.badge-free { background: var(--green-bg); color: var(--green); border: 1px solid rgba(21,128,61,0.2); }
+.badge-trial { background: var(--amber-bg); color: var(--amber); border: 1px solid rgba(180,83,9,0.2); }
+.badge-paid { background: var(--red-bg); color: var(--red); border: 1px solid rgba(194,65,12,0.2); }
+.badge-now { background: var(--ink); color: var(--cream); font-size: 0.55rem; }
+
+/* ── ROADMAP TIMELINE ── */
+.roadmap {
+  position: relative;
+  padding: 1rem 0;
+}
+
+.roadmap::before {
+  content: '';
+  position: absolute;
+  left: 55px;
+  top: 0; bottom: 0;
+  width: 2px;
+  background: var(--rule);
+}
+
+.rm-item {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.rm-week {
+  text-align: right;
+  padding-right: 1.5rem;
+  padding-top: 0.2rem;
+  position: relative;
+}
+
+.rm-week::after {
+  content: '';
+  position: absolute;
+  right: -6px; top: 8px;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  border: 2px solid;
+  background: var(--cream);
+}
+
+.rm-week span {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink3);
+}
+
+.rm-content { padding-bottom: 0.5rem; }
+.rm-content h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.3rem; }
+.rm-content p { font-size: 0.78rem; color: var(--ink3); line-height: 1.6; font-weight: 300; }
+
+.rm-week.p1::after { border-color: var(--red); }
+.rm-week.p2::after { border-color: var(--amber); }
+.rm-week.p3::after { border-color: var(--green); }
+.rm-week.p4::after { border-color: var(--blue); }
+
+.rm-phase-label {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 0.15rem 0.5rem;
+  border-radius: 3px;
+  display: inline-block;
+  margin-bottom: 0.4rem;
+}
+
+.rpm-1 { background: var(--red-bg); color: var(--red); }
+.rpm-2 { background: var(--amber-bg); color: var(--amber); }
+.rpm-3 { background: var(--green-bg); color: var(--green); }
+.rpm-4 { background: var(--blue-bg); color: var(--blue); }
+
+/* ── COSTS TABLE ── */
+.cost-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 1rem;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid var(--rule2);
+  align-items: center;
+  font-size: 0.82rem;
+}
+
+.cost-row:last-child { border: none; }
+.cost-label { color: var(--ink2); }
+.cost-phase { font-family: 'Fira Code', monospace; font-size: 0.6rem; color: var(--ink3); }
+.cost-price { font-family: 'Fira Code', monospace; font-size: 0.82rem; font-weight: 500; }
+
+/* ── SECTION DIVIDER ── */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 3rem 0 2rem;
+}
+
+.divider-line { flex: 1; height: 1px; background: var(--rule); }
+
+.divider-label {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink3);
+}
+
+/* ── QUICK START BOX ── */
+.quickstart {
+  background: var(--ink);
+  border-radius: 14px;
+  padding: 2.5rem;
+  margin: 3rem 0;
+}
+
+.qs-title {
+  font-family: 'Fraunces', serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--cream);
+  margin-bottom: 0.3rem;
+}
+
+.qs-sub { font-size: 0.82rem; color: rgba(250,247,242,0.4); margin-bottom: 1.5rem; font-weight: 300; }
+
+.qs-steps { display: flex; flex-direction: column; gap: 0.75rem; }
+
+.qs-step {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.qs-n {
+  font-family: 'Fraunces', serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--red);
+  opacity: 0.5;
+  width: 24px;
+  flex-shrink: 0;
+  line-height: 1.2;
+}
+
+.qs-text { font-size: 0.82rem; color: rgba(250,247,242,0.65); line-height: 1.6; }
+.qs-text strong { color: rgba(250,247,242,0.9); }
+
+/* ── FOOTER ── */
+.footer {
+  background: var(--ink);
+  padding: 2rem 4rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.6rem;
+  color: rgba(250,247,242,0.2);
+  letter-spacing: 0.1em;
+}
+
+.footer span:first-child { color: var(--red); }
+
+@media(max-width:768px) {
+  .cover { padding: 2rem; }
+  .cover-bottom { grid-template-columns: 1fr 1fr; }
+  .doc { padding: 3rem 1rem; }
+  .arch-layer { grid-template-columns: 80px 1fr; }
+  .step-header { grid-template-columns: 52px 1fr auto; gap: 1rem; }
+  .rm-item { grid-template-columns: 80px 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════ COVER ═══════════════════════════════════════ -->
+<div class="cover">
+  <div class="cover-noise"></div>
+  <div class="cover-top">
+    <div class="cover-logo">Younion Brand Experiences · Bengaluru</div>
+    <div class="cover-doc-num">DOC-INT-001 · Rev 1.0</div>
+  </div>
+
+  <div class="cover-main">
+    <div class="cover-eyebrow">Practical Execution Plan</div>
+    <h1>Integrating All<br>3rd Party Intent<br><em>Sources</em> into<br>One Place</h1>
+    <p class="cover-sub">A step-by-step technical and operational guide to connect Bombora, G2, Apollo, ZoomInfo, LinkedIn, and Clutch into a single unified intent engine — with automation, scoring, and CRM delivery.</p>
+  </div>
+
+  <div class="cover-bottom">
+    <div class="cover-stat">
+      <label>Total Steps</label>
+      <span>12</span>
+      <p>Across 4 phases</p>
+    </div>
+    <div class="cover-stat">
+      <label>Timeline</label>
+      <span>8 Weeks</span>
+      <p>Start to full automation</p>
+    </div>
+    <div class="cover-stat">
+      <label>Day 1 Cost</label>
+      <span>₹0</span>
+      <p>Free tools to start</p>
+    </div>
+    <div class="cover-stat">
+      <label>Central Hub</label>
+      <span>HubSpot</span>
+      <p>+ Google Sheets + Zapier</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ DOCUMENT ═══════════════════════════════════════ -->
+<div class="doc">
+
+  <!-- ── ARCHITECTURE OVERVIEW ── -->
+  <div class="phase-marker" style="margin-top:0;">
+    <div class="phase-num" style="color:rgba(28,25,23,0.1);">00</div>
+    <div class="phase-info">
+      <h2>The Integration Architecture</h2>
+      <div class="phase-tag">How all 6 sources flow into one place</div>
+    </div>
+  </div>
+
+  <p style="font-size:.88rem;color:var(--ink3);max-width:680px;line-height:1.7;margin-bottom:1.5rem;font-weight:300;">Before building anything, understand the full data flow. Six 3rd party sources → one collection layer → enrichment & scoring → one CRM → automated actions. Every piece has a specific role.</p>
+
+  <div class="arch-diagram">
+    <div class="arch-title">Younion · Unified Intent Architecture</div>
+    <div class="arch-layers">
+
+      <div class="arch-layer">
+        <div class="arch-layer-label">Sources</div>
+        <div class="arch-layer-nodes">
+          <span class="arch-node an-source">🌊 Bombora</span>
+          <span class="arch-node an-source">⭐ G2 / Capterra</span>
+          <span class="arch-node an-source">🚀 Apollo.io</span>
+          <span class="arch-node an-source">🔭 ZoomInfo</span>
+          <span class="arch-node an-source">💼 LinkedIn</span>
+          <span class="arch-node an-source">🏆 Clutch / IndiaMart</span>
+        </div>
+      </div>
+
+      <div class="arch-arrow">↓</div>
+
+      <div class="arch-layer">
+        <div class="arch-layer-label">Collection</div>
+        <div class="arch-layer-nodes">
+          <span class="arch-node an-collect">📥 Weekly CSV Exports</span>
+          <span class="arch-node an-collect">🔗 Native API Integrations</span>
+          <span class="arch-node an-collect">⚡ Zapier Automations</span>
+          <span class="arch-node an-collect">📋 Manual Uploads</span>
+        </div>
+      </div>
+
+      <div class="arch-arrow">↓</div>
+
+      <div class="arch-layer">
+        <div class="arch-layer-label">Master Layer</div>
+        <div class="arch-layer-nodes">
+          <span class="arch-node an-enrich">📊 Google Sheets Master Intent Sheet</span>
+          <span class="arch-node an-enrich">🔄 VLOOKUP TAL Matching</span>
+          <span class="arch-node an-enrich">🧮 Score Calculation Formula</span>
+        </div>
+      </div>
+
+      <div class="arch-arrow">↓</div>
+
+      <div class="arch-layer">
+        <div class="arch-layer-label">CRM</div>
+        <div class="arch-layer-nodes">
+          <span class="arch-node an-store">🏠 HubSpot CRM (Single Source of Truth)</span>
+          <span class="arch-node an-store">📁 Company + Contact Records</span>
+          <span class="arch-node an-store">🏷️ Intent Score · Level · Source Fields</span>
+        </div>
+      </div>
+
+      <div class="arch-arrow">↓</div>
+
+      <div class="arch-layer">
+        <div class="arch-layer-label">Actions</div>
+        <div class="arch-layer-nodes">
+          <span class="arch-node an-action">📞 Sales Call Queue</span>
+          <span class="arch-node an-action">💬 Slack Alert</span>
+          <span class="arch-node an-action">✉️ Email Sequence</span>
+          <span class="arch-node an-action">📊 Dashboard</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="infobox tip">
+    <div class="ib-icon">💡</div>
+    <div class="ib-text"><strong>The Core Principle</strong>Every source feeds the same Google Sheet → same HubSpot record → same score. Your SDR never needs to log into Bombora, G2, or Apollo. They only look at HubSpot. That's the entire goal of this integration.</div>
+  </div>
+
+  <!-- ═══════════════ PHASE 1 ═══════════════ -->
+  <div class="phase-marker">
+    <div class="phase-num">01</div>
+    <div class="phase-info">
+      <h2>Set Up Your Central Hub</h2>
+      <div class="phase-tag">Week 1 · Foundation · Free to start</div>
+    </div>
+  </div>
+
+  <p style="font-size:.88rem;color:var(--ink3);max-width:680px;line-height:1.7;margin-bottom:1.5rem;font-weight:300;">Before connecting any source, you need the destination. This is the "one place" everything will flow into. Two tools: HubSpot CRM (the live operational system) and a Google Sheet (the weekly data aggregator and scoring engine).</p>
+
+  <!-- Step 1 -->
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-num-box sn-red">1</div>
+      <div class="step-header-info">
+        <h3>Set Up HubSpot CRM with Intent Fields</h3>
+        <p>Create the CRM structure that will receive all intent data from every source</p>
+      </div>
+      <div class="step-meta">
+        <span class="step-week">Week 1 · Day 1–2</span>
+        <span class="step-cost">✓ Free</span>
+      </div>
+    </div>
+    <div class="step-body">
+      <ul class="task-list">
+        <li class="task-item">
+          <div class="task-check" onclick="toggleCheck(this)"></div>
+          <div class="task-content">
+            <div class="task-title">Create HubSpot Free Account</div>
+            <div class="task-detail">Go to hubspot.com → Start free → Sign up with Younion email. Free CRM gives you unlimited contacts, companies, and custom properties — everything you need for Phase 1.</div>
+            <span class="task-tool free">hubspot.com · Free forever</span>
+          </div>
+        </li>
+        <li class="task-item">
+          <div class="task-check" onclick="toggleCheck(this)"></div>
+          <div class="task-content">
+            <div class="task-title">Add 6 Custom Properties to Company Records</div>
+            <div class="task-detail">In HubSpot: Settings → Properties → Company Properties → Create property. Add these exact fields:</div>
+            <div class="code-block" style="margin-top:.75rem;">
+              <div class="cb-label">HubSpot Custom Properties to Create</div>
+              <pre><span class="cm">// Go to: Settings → Properties → Company → Create property</span>
+
+<span class="kw">Field 1:</span>  Intent Score         <span class="cm">→ Type: Number</span>
+<span class="kw">Field 2:</span>  Intent Level         <span class="cm">→ Type: Dropdown (High / Medium / Low)</span>
+<span class="kw">Field 3:</span>  Intent Source        <span class="cm">→ Type: Multi-checkbox (Bombora, G2, Apollo, ZoomInfo, LinkedIn, Clutch)</span>
+<span class="kw">Field 4:</span>  Intent Topics        <span class="cm">→ Type: Text (e.g., "B2B Event Management, Brand Activation")</span>
+<span class="kw">Field 5:</span>  Intent Signal Date   <span class="cm">→ Type: Date (last signal received)</span>
+<span class="kw">Field 6:</span>  Surge Strength       <span class="cm">→ Type: Dropdown (High / Moderate / Low)</span></pre>
+            </div>
+          </div>
+        </li>
+        <li class="task-item">
+          <div class="task-check" onclick="toggleCheck(this)"></div>
+          <div class="task-content">
+            <div class="task-title">Create 3 List Views in HubSpot</div>
+            <div class="task-detail">These become your daily working views. Go to Contacts → Companies → Create view:</div>
+            <div class="two-col" style="margin-top:.75rem;">
+              <div class="mini-box">
+                <h4>🔴 High Intent View</h4>
+                <ul>
+                  <li>Filter: Intent Score ≥ 60</li>
+                  <li>Sort: Intent Signal Date (newest first)</li>
+                  <li>Columns: Company, Score, Source, Topics, Owner</li>
+                  <li>This is SDR's daily starting point</li>
+                </ul>
+              </div>
+              <div class="mini-box">
+                <h4>🟡 Medium Intent View</h4>
+                <ul>
+                  <li>Filter: Intent Score 25–59</li>
+                  <li>Sort: Score (high to low)</li>
+                  <li>Columns: Company, Score, Source, Last Signal</li>
+                  <li>Weekly SDR review list</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </li>
+        <li class="task-item">
+          <div class="task-check" onclick="toggleCheck(this)"></div>
+          <div class="task-content">
+            <div class="task-title">Import Your Target Account List (TAL) into HubSpot</div>
+            <div class="task-detail">Export your 200–500 TAL companies from LinkedIn or Google Sheets as CSV → HubSpot → Contacts → Import → Company. Map: Company Name, Domain, Industry, City. These records will be updated with intent scores as signals arrive.</div>
+            <span class="task-tool free">HubSpot Import · CSV upload</span>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Step 2 -->
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-num-box sn-red">2</div>
+      <div class="step-header-info">
+        <h3>Build the Master Intent Google Sheet</h3>
+        <p>Your weekly data aggregator — all 6 sources land here before flowing to HubSpot</p>
+      </div>
+      <div class="step-meta">
+        <span class="step-week">Week 1 · Day 2–3</span>
+        <span class="step-cost">✓ Free</span>
+      </div>
+    </div>
+    <div class="step-body">
+      <p style="font-size:.82rem;color:var(--ink3);margin-bottom:1rem;font-weight:300;">This Google Sheet is your data warehouse before you have a real one. Create 8 tabs exactly as described below.</p>
+      <ul class="task-list">
+        <li class="task-item">
+          <div class="task-check" onclick="toggleCheck(this)"></div>
+          <div class="task-content">
+            <div class="task-title">Create Google Sheet: "Younion Intent Master"</div>
+            <div class="task-detail">Create a new Google Sheet with the following 8 tabs. Share with your sales and marketing team (View access for most, Edit for the person managing the data).</div>
+            <div class="code-block" style="margin-top:.75rem;">
+              <div class="cb-label">Google Sheet Tab Structure</div>
+              <pre><span class="kw">Tab 1:</span> MASTER_INTENT      <span class="cm">← Unified scored view (auto-calculated)</span>
+<span class="kw">Tab 2:</span> TAL                <span class="cm">← Your 200–500 target accounts (base data)</span>
+<span class="kw">Tab 3:</span> BOMBORA_RAW        <span class="cm">← Weekly paste from Bombora CSV export</span>
+<span class="kw">Tab 4:</span> G2_RAW             <span class="cm">← Weekly paste from G2 intent export</span>
+<span class="kw">Tab 5:</span> APOLLO_RAW         <span class="cm">← Weekly paste from Apollo export</span>
+<span class="kw">Tab 6:</span> ZOOMINFO_RAW       <span class="cm">← Weekly paste from ZoomInfo CSV</span>
+<span class="kw">Tab 7:</span> LINKEDIN_RAW       <span class="cm">← Weekly paste from LinkedIn analytics</span>
+<span class="kw">Tab 8:</span> CLUTCH_RAW         <span class="cm">← Weekly paste from Clutch enquiries</span></pre>
+            </div>
+          </div>
+        </li>
+        <li class="task-item">
+          <div class="task-check" onclick="toggleCheck(this)"></div>
+          <div class="task-content">
+            <div class="task-title">Set Up MASTER_INTENT Tab with Scoring Formulas</div>
+            <div class="task-detail">This tab pulls from all 6 raw tabs and calculates a unified score. Each row = one company from your TAL.</div>
+            <div class="code-block" style="margin-top:.75rem;">
+              <div class="cb-label">MASTER_INTENT Tab — Column Structure & Formulas</div>
+              <pre><span class="cm">Column A:</span> Company Name        <span class="cm">← From TAL tab</span>
+<span class="cm">Column B:</span> Domain              <span class="cm">← From TAL tab</span>
+<span class="cm">Column C:</span> Industry            <span class="cm">← From TAL tab</span>
+<span class="cm">Column D:</span> Bombora Score       <span class="cm">← =IF(VLOOKUP(B2,BOMBORA_RAW!$A:$C,3,0)="High",35,IF(...=20,0))</span>
+<span class="cm">Column E:</span> G2 Score            <span class="cm">← =IF(VLOOKUP(B2,G2_RAW!$A:$B,2,0)="Compared",30,IF(...="Viewed",20,0))</span>
+<span class="cm">Column F:</span> Apollo Score        <span class="cm">← =IF(COUNTIF(APOLLO_RAW!$A:$A,B2)>0,15,0)</span>
+<span class="cm">Column G:</span> ZoomInfo Score      <span class="cm">← =IF(COUNTIF(ZOOMINFO_RAW!$A:$A,B2)>0,20,0)</span>
+<span class="cm">Column H:</span> LinkedIn Score      <span class="cm">← =IF(COUNTIF(LINKEDIN_RAW!$A:$A,B2)>0,15,0)</span>
+<span class="cm">Column I:</span> Clutch Score        <span class="cm">← =IF(COUNTIF(CLUTCH_RAW!$A:$A,B2)>0,10,0)</span>
+<span class="cm">Column J:</span> TOTAL SCORE         <span class="cm">← =SUM(D2:I2)</span>
+<span class="cm">Column K:</span> Intent Level        <span class="cm">← =IF(J2>=60,"HIGH",IF(J2>=25,"MEDIUM","LOW"))</span>
+<span class="cm">Column L:</span> Active Sources      <span class="cm">← Concatenation of which sources fired</span>
+<span class="cm">Column M:</span> Last Updated        <span class="cm">← =TODAY()</span></pre>
+            </div>
+          </div>
+        </li>
+      </ul>
+
+      <div class="infobox good">
+        <div class="ib-icon">✅</div>
+        <div class="ib-text"><strong>What This Achieves</strong>Every Monday morning, you paste 6 new CSV exports into their raw tabs. Column J recalculates every company's score automatically. Column K shows intent level. You now have one ranked list of every TAL company by intent — ready to push to HubSpot.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ PHASE 2 ═══════════════ -->
+  <div class="phase-marker">
+    <div class="phase-num">02</div>
+    <div class="phase-info">
+      <h2>Connect Each Source</h2>
+      <div class="phase-tag">Weeks 2–4 · One source at a time</div>
+    </div>
+  </div>
+
+  <p style="font-size:.88rem;color:var(--ink3);max-width:680px;line-height:1.7;margin-bottom:1.5rem;font-weight:300;">Connect each 3rd party source using the best available method — native integration where possible, Zapier automation where not, manual CSV export as the fallback. Start with the free ones, add paid later.</p>
+
+  <!-- Step 3 - G2 -->
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-num-box sn-amber">3</div>
+      <div class="step-header-info">
+        <h3>Connect G2 → HubSpot (Native Integration)</h3>
+        <p>The easiest and highest-quality signal — buyers actively comparing vendors</p>
+      </div>
+      <div class="step-meta">
+        <span class="step-week">Week 2 · Day 1</span>
+        <span class="step-cost">✓ Free to start</span>
+      </div>
+    </div>
+    <div class="step-body">
+      <ul class="task-list">
+        <li class="task-item">
+          <div class="task-check" onclick="toggleCheck(this)"></div>
+          <div class="task-content">
+            <div class="task-title">Claim & Complete Younion's G2 Profile</div>
+            <div class="task-detail">Go to g2.com → Search "Younion" or your services → Claim profile → Fill in: company description, services, case studies (minimum 3), pricing range, and upload logo. Ask 5 existing clients to leave reviews — this unlocks intent data.</div>
+            <span class="task-tool free">g2.com · Free profile</span>
+          </div>
+        </li>
+        <li class="task-item">
+          <div class="task-check" onclick="toggleCheck(this)"></div>
+          <div class="task-content">
+            <div class="task-title">Enable G2 Buyer Intent Add-on</div>
+            <div class="task-detail">In G2 admin → My Products → Buyer Intent → Enable. Free tier shows who viewed your profile. Paid tier (~$299/mo) shows who compared you vs competitors. Start with free, upgrade after 30 days if signals are valuable.</div>
+            <span class="task-tool trial">G2 Intent · Free view-level / Paid comparison-level</span>
+          </div>
+        </li>
+        <li class="task-item">
+          <div class="task-check" onclick="toggleCheck(this)"></div>
+          <div class="task-content">
+            <div class="task-title">Connect G2 → HubSpot via Native Integration</div>
+            <div class="task-detail">In G2 admin → Integrations → HubSpot → Connect → Authorize. Configure: when a company views your G2 profile → update HubSpot company record with "G2 Profile View" tag + set Intent Source = G2 + add 20 points to Intent Score field.</div>
+            <div class="code-block" style="margin-top:.75rem;">
+              <div class="cb-label">G2 → HubSpot Mapping</div>
+              <pre><span class="kw">G2 Signal:</span>  Profile Viewed           → HubSpot: Intent Source = "G2", +<span class="num">20</span> points
+<span class="kw">G2 Signal:</span>  Competitor Comparison     → HubSpot: Intent Source = "G2", +<span class="num">30</span> points
+<span class="kw">G2 Signal:</span>  Review Read               → HubSpot: Intent Source = "G2", +<span class="num">10</span> points
+<span class="kw">G2 Signal:</span>  Category Page (your cat)  → HubSpot: Intent Source = "G2", +<span class="num">15</span> points</pre>
+            </div>
+            <span class="task-tool free">Native G2 ↔ HubSpot integration · No code needed</span>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Step 4 - Apollo -->
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-num-box sn-amber">4</div>
+      <div class="step-header-info">
+        <h3>Connect Apollo.io → HubSpot + Google Sheet</h3>
+        <p>Contact-level intent data and decision-maker enrichment — free to start</p>
+      </div>
+      <div class="step-meta">
+        <span class="step-week">Week 2 · Day 2</span>
+        <span class="step-cost">✓ Free tier</span>
+      </div>
+    </div>
+    <div class="step-body">
+      <ul class="task-list">
+        <li class="task-item">
+          <div class="task-check" onclick="toggleCheck(this)"></div>
+          <div class="task-content">
+            <div class="task-title">Create Apollo.io Account & Set ICP Filters</div>
+            <div class="task-detail">Go to apollo.io → Sign up free → Go to Search → Set Company Filters: Industry (FMCG, BFSI, Pharma, Tech), HQ Location (India), Employees (500+), Keywords (marketing, brand, events). Set Contact Filters: Title contains (CMO, Marketing Head, Brand Manager, Marketing Director).</div>
+            <span class="task-tool free">apollo.io · 100 exports/month free</span>
+          </div>
+        </li>
+        <li class="task-item">
+          <div class="task-check" onclick="toggleCheck(this)"></div>
+          <div class="task-content">
+            <div class="task-title">Connect Apollo → HubSpot (Native Sync)</div>
+            <div class="task-detail">In Apollo → Settings → Integrations → HubSpot → Connect. Enable: "Push contacts to HubSpot on export" and "Sync company data". When Apollo flags a contact as intent-active, it automatically creates/updates the HubSpot record.</div>
+            <span class="task-tool free">Apollo ↔ HubSpot · Native integration · Free</span>
+          </div>
+        </li>
+        <li class="task-item">
+          <div class="task-check" onclick="toggleCheck(this)"></div>
+          <div class="task-content">
+            <div class="task-title">Weekly Export Routine: Apollo → Google Sheet</div>
+            <div class="task-detail">Every Monday: Apollo → Search → Filter by "Intent Active" → Export as CSV → Paste into APOLLO_RAW tab in your Google Sheet. The MASTER_INTENT tab will auto-recalculate scores for any company on your TAL.</div>
+            <span class="task-tool">Every Monday · 10 minutes</span>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Step 5 - LinkedIn -->
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-num-box sn-amber">5</div>
+      <div class="step-header-info">
+        <h3>Connect LinkedIn Intent → HubSpot via Zapier</h3>
+        <p>Profile views, engagement data, and matched audience signals from LinkedIn</p>
+      </div>
+      <div class="step-meta">
+        <span class="step-week">Week 2 · Day 3–4</span>
+        <span class="step-cost">✓ Free (Zapier)</span>
+      </div>
+    </div>
+    <div class="step-body">
+      <ul class="task-list">
+        <li class="task-item">
+          <div class="task-check" onclick="toggleCheck(this)"></div>
+          <div class="task-content">
+            <div class="task-title">Install LinkedIn Insight Tag on younion.live</div>
+            <div class="task-detail">LinkedIn Campaign Manager → Account Assets → Insight Tag → Copy the JavaScript snippet → Add to younion.live website header (or via Google Tag Manager). This enables company-level identification of website visitors and unlocks retargeting audiences.</div>
+            <div class="code-block" style="margin-top:.75rem;">
+              <div class="cb-label">LinkedIn Insight Tag — Add to website &lt;head&gt;</div>
+              <pre><span class="cm">&lt;!-- LinkedIn Insight Tag --&gt;</span>
+<span class="kw">&lt;script</span> type=<span class="str">"text/javascript"</span><span class="kw">&gt;</span>
+  _linkedin_partner_id = <span class="str">"YOUR_PARTNER_ID"</span>;
+  window._linkedin_data_partner_ids = window._linkedin_data_partner_ids || [];
+  window._linkedin_data_partner_ids.<span class="fn">push</span>(_linkedin_partner_id);
+<span class="kw">&lt;/script&gt;</span>
+<span class="cm">&lt;!-- Paste the full script from Campaign Manager --&gt;</span></pre>
+            </div>
+          </div>
+        </li>
+        <li class="task-item">
+          <div class="task-check" onclick="toggleCheck(this)"></div>
+          <div class="task-content">
+            <div class="task-title">Build Zapier Automation: LinkedIn Lead Form → HubSpot</div>
+            <div class="task-detail">If running LinkedIn Lead Gen Forms (even a ₹5K/week test campaign), connect via Zapier so every form submission auto-creates a HubSpot contact with intent tags.</div>
+            <div class="zap-flow" style="margin-top:.75rem;">
+              <div class="zap-step">
+                <div class="zap-line"><div class="zap-dot" style="background:var(--blue-bg);color:var(--blue);border-color:var(--blue);">💼</div><div class="zap-connector"></div></div>
+                <div class="zap-content"><div class="zap-label">Trigger</div><div class="zap-title">LinkedIn Lead Gen Form — New Submission</div><div class="zap-desc">Zapier watches for new LinkedIn Lead Gen Form responses on your ad account</div></div>
+              </div>
+              <div class="zap-step">
+                <div class="zap-line"><div class="zap-dot" style="background:var(--amber-bg);color:var(--amber);border-color:var(--amber);">⚡</div><div class="zap-connector"></div></div>
+                <div class="zap-content"><div class="zap-label">Action 1</div><div class="zap-title">HubSpot — Create or Update Contact</div><div class="zap-desc">Map: Email, Name, Company, Job Title from LinkedIn form → HubSpot contact record</div></div>
+              </div>
+              <div class="zap-step">
+                <div class="zap-line"><div class="zap-dot" style="background:var(--green-bg);color:var(--green);border-color:var(--green);">📊</div><div class="zap-connector"></div></div>
+                <div class="zap-content"><div class="zap-label">Action 2</div><div class="zap-title">HubSpot — Update Company Properties</div><div class="zap-desc">Set: Intent Source = "LinkedIn", Intent Level = "Medium", Intent Score += 15, Intent Signal Date = Today</div></div>
+              </div>
+              <div class="zap-step">
+                <div class="zap-line"><div class="zap-dot" style="background:var(--red-bg);color:var(--red);border-color:var(--red);">💬</div></div>
+                <div class="zap-content"><div class="zap-label">Action 3</div><div class="zap-title">Slack — Send Message to #intent-signals</div><div class="zap-desc">Post: "🔵 LinkedIn Lead: [Name] from [Company] submitted capability deck request"</div></div>
+              </div>
+            </div>
+            <span class="task-tool free">Zapier Free · 100 tasks/month</span>
+          </div>
+        </li>
+        <li class="task-item">
+          <div class="task-check" onclick="toggleCheck(this)"></div>
+          <div class="task-content">
+            <div class="task-title">Weekly Manual: Export LinkedIn Company Page Analytics</div>
+            <div class="task-detail">LinkedIn Company Page → Analytics → Visitor Analytics → Export to XLS → Filter companies from your TAL → Paste into LINKEDIN_RAW tab. Do this every Monday. Takes 5 minutes.</div>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Step 6 - Clutch / IndiaMart -->
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-num-box sn-amber">6</div>
+      <div class="step-header-info">
+        <h3>Connect Clutch & IndiaMart → HubSpot via Zapier</h3>
+        <p>India-specific directory signals — buyers actively shortlisting vendors</p>
+      </div>
+      <div class="step-meta">
+        <span class="step-week">Week 2 · Day 5</span>
+        <span class="step-cost">✓ Free</span>
+      </div>
+    </div>
+    <div class="step-body">
+      <ul class="task-list">
+        <li class="task-item">
+          <div class="task-check" onclick="toggleCheck(this)"></div>
+          <div class="task-content">
+            <div class="task-title">List Younion on Clutch.co (Free)</div>
+            <div class="task-detail">Go to clutch.co → List your company → Fill: Services (Event Management, Brand Activation, Experiential Marketing), Portfolio (add 5 projects with photos and outcomes), Location (Bangalore), Client focus (B2B, Mid-market). This takes 2 hours and drives inbound enquiries from buyers actively searching.</div>
+            <span class="task-tool free">clutch.co · Free listing</span>
+          </div>
+        </li>
+        <li class="task-item">
+          <div class="task-check" onclick="toggleCheck(this)"></div>
+          <div class="task-content">
+            <div class="task-title">Connect Clutch Enquiry Email → HubSpot via Zapier</div>
+            <div class="task-detail">Clutch sends enquiry emails to a dedicated email. Connect with Zapier Email Parser to auto-create HubSpot contacts from every Clutch enquiry.</div>
+            <div class="code-block" style="margin-top:.75rem;">
+              <div class="cb-label">Zapier Flow: Clutch Email → HubSpot</div>
+              <pre><span class="kw">Step 1</span> [Trigger]:  Email by Zapier — New email at parser.zapier.com/<span class="str">your-address</span>
+                    <span class="cm">→ Forward all Clutch enquiry emails here</span>
+
+<span class="kw">Step 2</span> [Action]:   HubSpot — Create/Update Contact
+                    <span class="cm">→ Extract: Name, Company, Email, Service Requested from email body</span>
+                    <span class="cm">→ Set: Intent Source = "Clutch", Intent Score = 35 (high commercial intent)</span>
+
+<span class="kw">Step 3</span> [Action]:   Slack — Notify #sales-alerts
+                    <span class="cm">→ "🏆 Clutch Enquiry: [Company] is looking for [Service]"</span></pre>
+            </div>
+            <span class="task-tool free">Zapier Email Parser · Free</span>
+          </div>
+        </li>
+        <li class="task-item">
+          <div class="task-check" onclick="toggleCheck(this)"></div>
+          <div class="task-content">
+            <div class="task-title">Set Up IndiaMart Business Profile + Lead Manager</div>
+            <div class="task-detail">Go to seller.indiamart.com → Create business profile → Add services → Enable "Lead Manager". IndiaMart sends email + SMS for every enquiry. Set up Zapier Email Parser the same way as Clutch to auto-push to HubSpot.</div>
+            <span class="task-tool free">IndiaMart · Free basic listing</span>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Step 7 - Bombora -->
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-num-box sn-green">7</div>
+      <div class="step-header-info">
+        <h3>Connect Bombora → HubSpot (Week 3–4, After Trial)</h3>
+        <p>The most powerful 3rd party signal — but validate with free tools first</p>
+      </div>
+      <div class="step-meta">
+        <span class="step-week">Week 3–4</span>
+        <span class="step-cost">Paid · ~$500/mo</span>
+      </div>
+    </div>
+    <div class="step-body">
+
+      <div class="infobox warn">
+        <div class="ib-icon">⚠️</div>
+        <div class="ib-text"><strong>Do This in Week 3, Not Week 1</strong>Bombora is the most powerful source but also costs money. Validate your process with free tools first (G2, Apollo, Clutch). Once your Google Sheet scoring and HubSpot pipeline are working, then add Bombora.</div>
+      </div>
+
+      <ul class="task-list">
+        <li class="task-item">
+          <div class="task-check" onclick="toggleCheck(this)"></div>
+          <div class="task-content">
+            <div class="task-title">Access Bombora via HubSpot Marketplace (Easiest Route)</div>
+            <div class="task-detail">In HubSpot → Marketplace → App Marketplace → Search "Bombora" → Install. Bombora has a native HubSpot integration. You pay Bombora directly and they push surge data directly into your HubSpot company records. No manual CSV needed.</div>
+            <div class="code-block" style="margin-top:.75rem;">
+              <div class="cb-label">Bombora → HubSpot: What Gets Pushed Automatically</div>
+              <pre><span class="kw">For each TAL company in HubSpot:</span>
+  bombora_surge_score    → <span class="num">0</span>–<span class="num">100</span> (weekly updated)
+  bombora_surge_topics   → <span class="str">"B2B Event Management, Brand Activation"</span>
+  bombora_signal_date    → <span class="str">"2025-02-26"</span>
+
+<span class="kw">Your HubSpot workflow then:</span>
+  IF bombora_surge_score >= <span class="num">70</span> → Intent Score += <span class="num">35</span>
+  IF bombora_surge_score >= <span class="num">40</span> → Intent Score += <span class="num">20</span>
+  TRIGGER: Update Intent Level field based on new total score</pre>
+            </div>
+          </div>
+        </li>
+        <li class="task-item">
+          <div class="task-check" onclick="toggleCheck(this)"></div>
+          <div class="task-content">
+            <div class="task-title">Configure Bombora Surge Topics for Younion</div>
+            <div class="task-detail">In Bombora setup: Define your intent topics. These are the keywords Bombora will track across 5,000+ B2B publisher sites. Enter all of these:</div>
+            <div class="two-col" style="margin-top:.75rem;">
+              <div class="mini-box">
+                <h4>Primary Topics (High Priority)</h4>
+                <ul>
+                  <li>B2B Event Management</li>
+                  <li>Experiential Marketing</li>
+                  <li>Brand Activation Agency</li>
+                  <li>Corporate Event Management India</li>
+                </ul>
+              </div>
+              <div class="mini-box">
+                <h4>Secondary Topics (Medium)</h4>
+                <ul>
+                  <li>Marketing Agency India</li>
+                  <li>Digital + On-ground Campaign</li>
+                  <li>Brand Experience Agency</li>
+                  <li>Event Production Company</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </li>
+        <li class="task-item">
+          <div class="task-check" onclick="toggleCheck(this)"></div>
+          <div class="task-content">
+            <div class="task-title">Upload TAL to Bombora for Matching</div>
+            <div class="task-detail">Bombora → Account-Based Intent → Upload your TAL as a CSV of company domains. Bombora will match your TAL against their dataset and only alert you when those specific companies surge — filtering out irrelevant noise.</div>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Step 8 - ZoomInfo -->
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-num-box sn-green">8</div>
+      <div class="step-header-info">
+        <h3>Connect ZoomInfo → HubSpot (Trial First)</h3>
+        <p>Enterprise B2B intelligence layered on top of your existing signals</p>
+      </div>
+      <div class="step-meta">
+        <span class="step-week">Week 4</span>
+        <span class="step-cost">14-day free trial</span>
+      </div>
+    </div>
+    <div class="step-body">
+      <ul class="task-list">
+        <li class="task-item">
+          <div class="task-check" onclick="toggleCheck(this)"></div>
+          <div class="task-content">
+            <div class="task-title">Start ZoomInfo Free Trial & Set Intent Topics</div>
+            <div class="task-detail">Go to zoominfo.com → Request demo/trial → Upload your TAL → Go to Intent → Configure the same topics you used in Bombora. ZoomInfo will cross-reference against their publisher network and flag in-market accounts.</div>
+            <span class="task-tool trial">ZoomInfo · 14-day free trial</span>
+          </div>
+        </li>
+        <li class="task-item">
+          <div class="task-check" onclick="toggleCheck(this)"></div>
+          <div class="task-content">
+            <div class="task-title">Connect ZoomInfo → HubSpot (Native Integration)</div>
+            <div class="task-detail">ZoomInfo has a native HubSpot integration. In ZoomInfo → Integrations → HubSpot → Connect → Map fields. Configure: when a ZoomInfo in-market signal fires for a TAL account → update HubSpot company: Intent Source = "ZoomInfo", Intent Score += 20.</div>
+            <span class="task-tool trial">ZoomInfo ↔ HubSpot · Native connector</span>
+          </div>
+        </li>
+        <li class="task-item">
+          <div class="task-check" onclick="toggleCheck(this)"></div>
+          <div class="task-content">
+            <div class="task-title">Evaluate After Trial: Bombora vs ZoomInfo vs Both</div>
+            <div class="task-detail">After 14 days, check: which source generated more high-intent accounts that sales actually converted? If Bombora gives FMCG signals and ZoomInfo gives BFSI signals, use both. If they duplicate heavily, pick one. Don't pay for overlap.</div>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ═══════════════ PHASE 3 ═══════════════ -->
+  <div class="phase-marker">
+    <div class="phase-num">03</div>
+    <div class="phase-info">
+      <h2>Automate the Flow</h2>
+      <div class="phase-tag">Weeks 5–6 · Zero manual work after setup</div>
+    </div>
+  </div>
+
+  <!-- Step 9 - Master Zapier -->
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-num-box sn-blue">9</div>
+      <div class="step-header-info">
+        <h3>Build the Master Zapier Automation Hub</h3>
+        <p>Connect all moving parts so signals flow automatically without anyone touching them</p>
+      </div>
+      <div class="step-meta">
+        <span class="step-week">Week 5</span>
+        <span class="step-cost">Zapier Free / $20/mo</span>
+      </div>
+    </div>
+    <div class="step-body">
+      <p style="font-size:.82rem;color:var(--ink3);margin-bottom:1.25rem;font-weight:300;">Build these 4 Zapier workflows. Each one automates a critical handoff in the intent engine.</p>
+
+      <div style="background:var(--paper);border:1px solid var(--rule);border-radius:10px;padding:1.25rem;margin-bottom:1rem;">
+        <div style="font-family:'Fira Code',monospace;font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:var(--red);margin-bottom:.75rem;">Zap #1 — Google Sheets → HubSpot (Weekly Score Sync)</div>
+        <div class="zap-flow">
+          <div class="zap-step"><div class="zap-line"><div class="zap-dot" style="background:var(--green-bg);color:var(--green);border-color:var(--green);">📊</div><div class="zap-connector"></div></div><div class="zap-content"><div class="zap-label">Trigger · Every Monday 8am</div><div class="zap-title">Google Sheets — New/Updated Row in MASTER_INTENT</div><div class="zap-desc">Zapier checks every row where Intent Level changed since last week</div></div></div>
+          <div class="zap-step"><div class="zap-line"><div class="zap-dot" style="background:var(--amber-bg);color:var(--amber);border-color:var(--amber);">🏠</div><div class="zap-connector"></div></div><div class="zap-content"><div class="zap-label">Action 1</div><div class="zap-title">HubSpot — Find Company by Domain</div><div class="zap-desc">Search HubSpot for existing company record using domain from Sheet column B</div></div></div>
+          <div class="zap-step"><div class="zap-line"><div class="zap-dot" style="background:var(--blue-bg);color:var(--blue);border-color:var(--blue);">✏️</div></div><div class="zap-content"><div class="zap-label">Action 2</div><div class="zap-title">HubSpot — Update Company Properties</div><div class="zap-desc">Write: Intent Score (col J), Intent Level (col K), Intent Sources (col L), Intent Signal Date = today</div></div></div>
+        </div>
+      </div>
+
+      <div style="background:var(--paper);border:1px solid var(--rule);border-radius:10px;padding:1.25rem;margin-bottom:1rem;">
+        <div style="font-family:'Fira Code',monospace;font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:var(--red);margin-bottom:.75rem;">Zap #2 — HubSpot → Slack (Daily Intent Digest)</div>
+        <div class="zap-flow">
+          <div class="zap-step"><div class="zap-line"><div class="zap-dot" style="background:var(--amber-bg);color:var(--amber);border-color:var(--amber);">⏰</div><div class="zap-connector"></div></div><div class="zap-content"><div class="zap-label">Trigger · Every day 9am</div><div class="zap-title">Schedule by Zapier — Daily 9:00 AM</div><div class="zap-desc">Fires every weekday morning to kickstart the sales day</div></div></div>
+          <div class="zap-step"><div class="zap-line"><div class="zap-dot" style="background:var(--green-bg);color:var(--green);border-color:var(--green);">🔍</div><div class="zap-connector"></div></div><div class="zap-content"><div class="zap-label">Action 1</div><div class="zap-title">HubSpot — Search Companies (Intent Score ≥ 60)</div><div class="zap-desc">Find all companies where Intent Score ≥ 60 AND Intent Signal Date = today or yesterday</div></div></div>
+          <div class="zap-step"><div class="zap-line"><div class="zap-dot" style="background:var(--purple-bg);color:var(--purple);border-color:var(--purple);">💬</div></div><div class="zap-content"><div class="zap-label">Action 2</div><div class="zap-title">Slack — Post to #intent-hotlist</div><div class="zap-desc">Post: "🔥 TODAY'S HOT ACCOUNTS: [Company 1] — Score 82 (Bombora + G2) | [Company 2] — Score 74 (ZoomInfo) | ..."</div></div></div>
+        </div>
+      </div>
+
+      <div style="background:var(--paper);border:1px solid var(--rule);border-radius:10px;padding:1.25rem;margin-bottom:1rem;">
+        <div style="font-family:'Fira Code',monospace;font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:var(--red);margin-bottom:.75rem;">Zap #3 — High Intent → CRM Task + Email Sequence</div>
+        <div class="zap-flow">
+          <div class="zap-step"><div class="zap-line"><div class="zap-dot" style="background:var(--red-bg);color:var(--red);border-color:var(--red);">⚡</div><div class="zap-connector"></div></div><div class="zap-content"><div class="zap-label">Trigger</div><div class="zap-title">HubSpot — Company Property Changed: Intent Score ≥ 60</div><div class="zap-desc">Fires immediately when any company's Intent Score crosses 60</div></div></div>
+          <div class="zap-step"><div class="zap-line"><div class="zap-dot" style="background:var(--amber-bg);color:var(--amber);border-color:var(--amber);">📋</div><div class="zap-connector"></div></div><div class="zap-content"><div class="zap-label">Action 1</div><div class="zap-title">HubSpot — Create Task</div><div class="zap-desc">Task: "CALL [Company] NOW — Intent Score [Score] via [Sources] — Research topic: [Topics]" · Due: Today · Assign to: SDR owner</div></div></div>
+          <div class="zap-step"><div class="zap-line"><div class="zap-dot" style="background:var(--blue-bg);color:var(--blue);border-color:var(--blue);">✉️</div></div><div class="zap-content"><div class="zap-label">Action 2</div><div class="zap-title">HubSpot — Enroll in "High Intent" Email Sequence</div><div class="zap-desc">Auto-start 3-email sequence: Email 1 (today): Personal outreach referencing research topic · Email 2 (+2 days): Case study · Email 3 (+5 days): Soft CTA</div></div></div>
+        </div>
+      </div>
+
+      <div style="background:var(--paper);border:1px solid var(--rule);border-radius:10px;padding:1.25rem;">
+        <div style="font-family:'Fira Code',monospace;font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:var(--red);margin-bottom:.75rem;">Zap #4 — Intent Spike Alert (Real-time)</div>
+        <div class="zap-flow">
+          <div class="zap-step"><div class="zap-line"><div class="zap-dot" style="background:var(--red-bg);color:var(--red);border-color:var(--red);">🚨</div><div class="zap-connector"></div></div><div class="zap-content"><div class="zap-label">Trigger</div><div class="zap-title">HubSpot — Company: Intent Score jumped by 30+ points in one week</div><div class="zap-desc">A company that was "Low" suddenly becomes "High" — the most important signal</div></div></div>
+          <div class="zap-step"><div class="zap-line"><div class="zap-dot" style="background:var(--purple-bg);color:var(--purple);border-color:var(--purple);">🔔</div></div><div class="zap-content"><div class="zap-label">Action</div><div class="zap-title">Slack DM to Sales Lead + #intent-signals channel</div><div class="zap-desc">"🚨 INTENT SPIKE: [Company] jumped from [old score] to [new score] in 1 week. Trigger: [Source]. Call immediately."</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 10 - Dashboard -->
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-num-box sn-blue">10</div>
+      <div class="step-header-info">
+        <h3>Build the Live Dashboard in HubSpot + Looker Studio</h3>
+        <p>One URL your sales and marketing team opens every morning</p>
+      </div>
+      <div class="step-meta">
+        <span class="step-week">Week 5–6</span>
+        <span class="step-cost">✓ Free</span>
+      </div>
+    </div>
+    <div class="step-body">
+      <ul class="task-list">
+        <li class="task-item">
+          <div class="task-check" onclick="toggleCheck(this)"></div>
+          <div class="task-content">
+            <div class="task-title">Build HubSpot Dashboard (Native — Zero Cost)</div>
+            <div class="task-detail">In HubSpot → Reports → Dashboards → Create Dashboard → "Intent Command Center". Add these reports:
+              <br>· Companies by Intent Level (bar chart — counts of High / Medium / Low)
+              <br>· Intent Score distribution (histogram)
+              <br>· Top 10 accounts by score (table)
+              <br>· Signals by source (pie chart — which source drives most)
+              <br>· Intent trend over time (line chart — weekly)
+            </div>
+            <span class="task-tool free">HubSpot Dashboards · Free</span>
+          </div>
+        </li>
+        <li class="task-item">
+          <div class="task-check" onclick="toggleCheck(this)"></div>
+          <div class="task-content">
+            <div class="task-title">Build Looker Studio Dashboard (Shareable Public URL)</div>
+            <div class="task-detail">Go to lookerstudio.google.com → Create → Connect to your Google Sheet (MASTER_INTENT tab) → Build the visual dashboard with: Intent funnel, channel quality bars, industry breakdown, top accounts table. Publish → Get shareable link. This is the URL you share with the team (no login needed to view).</div>
+            <span class="task-tool free">Google Looker Studio · Free · Shareable link</span>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ═══════════════ PHASE 4 ═══════════════ -->
+  <div class="phase-marker">
+    <div class="phase-num">04</div>
+    <div class="phase-info">
+      <h2>Measure, Refine & Scale</h2>
+      <div class="phase-tag">Weeks 7–8 · Optimise based on real data</div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-num-box sn-purple">11</div>
+      <div class="step-header-info">
+        <h3>Weekly Intent Review Process</h3>
+        <p>The operating rhythm that keeps the engine running — 30 minutes every Monday</p>
+      </div>
+      <div class="step-meta">
+        <span class="step-week">Every Week</span>
+        <span class="step-cost">30 min/week</span>
+      </div>
+    </div>
+    <div class="step-body">
+      <ul class="task-list">
+        <li class="task-item">
+          <div class="task-check" onclick="toggleCheck(this)"></div>
+          <div class="task-content">
+            <div class="task-title">Monday 8:30 AM — Export All 6 Sources</div>
+            <div class="task-detail">Set a recurring calendar reminder every Monday. Export in this order:
+              <br>1. Bombora weekly surge report (email or download CSV from dashboard)
+              <br>2. G2 buyer intent export (G2 admin → Intent → Export)
+              <br>3. Apollo intent-active contacts (Apollo → Search → Filter intent → Export)
+              <br>4. ZoomInfo in-market signals (ZoomInfo → Intent → Export)
+              <br>5. LinkedIn Company Page analytics export (Page Admin → Analytics → Export)
+              <br>6. Clutch/IndiaMart enquiry log (check email inbox, copy into sheet)
+            </div>
+          </div>
+        </li>
+        <li class="task-item">
+          <div class="task-check" onclick="toggleCheck(this)"></div>
+          <div class="task-content">
+            <div class="task-title">Monday 9:00 AM — Paste Into Google Sheet</div>
+            <div class="task-detail">Paste each export into its respective raw tab (BOMBORA_RAW, G2_RAW, etc.). The MASTER_INTENT tab recalculates automatically. Review the top 10 accounts sorted by score descending.</div>
+          </div>
+        </li>
+        <li class="task-item">
+          <div class="task-check" onclick="toggleCheck(this)"></div>
+          <div class="task-content">
+            <div class="task-title">Monday 9:15 AM — SDR Briefing</div>
+            <div class="task-detail">Share the Looker Studio dashboard link in the team WhatsApp/Slack. The Zapier Daily Digest should have already posted in #intent-hotlist. SDR reviews High Intent list and begins calling from top to bottom.</div>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-num-box sn-purple">12</div>
+      <div class="step-header-info">
+        <h3>Monthly Scoring Model Calibration</h3>
+        <p>Adjust point values based on which signals actually converted to meetings</p>
+      </div>
+      <div class="step-meta">
+        <span class="step-week">Monthly</span>
+        <span class="step-cost">1 hour/month</span>
+      </div>
+    </div>
+    <div class="step-body">
+      <div class="infobox info">
+        <div class="ib-icon">📊</div>
+        <div class="ib-text"><strong>Why This Matters</strong>After 4 weeks of data, you'll know: "Every Bombora High Surge account that sales called — 40% booked a meeting. But every LinkedIn-only account — only 8% booked a meeting." This means Bombora signals should score higher than LinkedIn signals. Adjust accordingly monthly.</div>
+      </div>
+      <ul class="task-list">
+        <li class="task-item">
+          <div class="task-check" onclick="toggleCheck(this)"></div>
+          <div class="task-content">
+            <div class="task-title">Pull Conversion Data from HubSpot</div>
+            <div class="task-detail">HubSpot → Reports → Create report: Companies where Intent Level = High AND Meeting Booked = Yes. Group by Intent Source. This shows which source produces the highest-quality signals. Recalibrate point values in your Google Sheet formulas accordingly.</div>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ── TOOL COMPARISON ── -->
+  <div class="divider"><div class="divider-line"></div><div class="divider-label">Tool Decision Matrix</div><div class="divider-line"></div></div>
+
+  <table class="tool-table">
+    <tr>
+      <th>Source</th>
+      <th>Integration Method</th>
+      <th>Native HubSpot?</th>
+      <th>Weekly Effort</th>
+      <th>Cost</th>
+      <th>Start When</th>
+    </tr>
+    <tr>
+      <td><strong>G2 / Capterra</strong></td>
+      <td>Native HubSpot integration</td>
+      <td>✅ Yes</td>
+      <td>0 min (auto)</td>
+      <td><span class="badge badge-free">Free (views) / $299/mo (compare)</span></td>
+      <td><span class="badge badge-now">Day 1</span></td>
+    </tr>
+    <tr>
+      <td><strong>Apollo.io</strong></td>
+      <td>Native HubSpot sync + CSV export</td>
+      <td>✅ Yes</td>
+      <td>10 min/week</td>
+      <td><span class="badge badge-free">Free (100 contacts/mo)</span></td>
+      <td><span class="badge badge-now">Day 1</span></td>
+    </tr>
+    <tr>
+      <td><strong>LinkedIn</strong></td>
+      <td>Zapier (Lead Forms) + Manual (Analytics)</td>
+      <td>⚡ Via Zapier</td>
+      <td>10 min/week</td>
+      <td><span class="badge badge-free">Free (organic) / ₹5K/wk (ads)</span></td>
+      <td><span class="badge badge-now">Week 2</span></td>
+    </tr>
+    <tr>
+      <td><strong>Clutch / IndiaMart</strong></td>
+      <td>Zapier Email Parser</td>
+      <td>⚡ Via Zapier</td>
+      <td>5 min/week</td>
+      <td><span class="badge badge-free">Free (listing)</span></td>
+      <td><span class="badge badge-now">Week 2</span></td>
+    </tr>
+    <tr>
+      <td><strong>Bombora</strong></td>
+      <td>Native HubSpot integration (paid)</td>
+      <td>✅ Yes</td>
+      <td>0 min (auto)</td>
+      <td><span class="badge badge-paid">~$500–$1,000/mo</span></td>
+      <td><span class="badge badge-trial">Week 3–4</span></td>
+    </tr>
+    <tr>
+      <td><strong>ZoomInfo</strong></td>
+      <td>Native HubSpot integration (trial → paid)</td>
+      <td>✅ Yes</td>
+      <td>0 min (auto)</td>
+      <td><span class="badge badge-paid">Enterprise pricing</span></td>
+      <td><span class="badge badge-trial">Week 4 (after trial)</span></td>
+    </tr>
+  </table>
+
+  <!-- ── COST BREAKDOWN ── -->
+  <div class="divider"><div class="divider-line"></div><div class="divider-label">Cost Breakdown</div><div class="divider-line"></div></div>
+
+  <div class="two-col">
+    <div class="mini-box">
+      <h4>Month 1 Cost (Free Start)</h4>
+      <div class="cost-row"><div class="cost-label">HubSpot CRM</div><div class="cost-phase">Always</div><div class="cost-price" style="color:var(--green);">₹0</div></div>
+      <div class="cost-row"><div class="cost-label">G2 Profile (Free tier)</div><div class="cost-phase">Always</div><div class="cost-price" style="color:var(--green);">₹0</div></div>
+      <div class="cost-row"><div class="cost-label">Apollo.io (Free tier)</div><div class="cost-phase">Month 1</div><div class="cost-price" style="color:var(--green);">₹0</div></div>
+      <div class="cost-row"><div class="cost-label">Zapier (Free tier)</div><div class="cost-phase">Month 1</div><div class="cost-price" style="color:var(--green);">₹0</div></div>
+      <div class="cost-row"><div class="cost-label">Clutch / IndiaMart</div><div class="cost-phase">Always</div><div class="cost-price" style="color:var(--green);">₹0</div></div>
+      <div class="cost-row"><div class="cost-label">Looker Studio</div><div class="cost-phase">Always</div><div class="cost-price" style="color:var(--green);">₹0</div></div>
+      <div class="cost-row" style="border-top:2px solid var(--ink);margin-top:.5rem;padding-top:.75rem;"><div class="cost-label" style="font-weight:600;">Month 1 Total</div><div class="cost-phase"></div><div class="cost-price" style="color:var(--green);font-size:1rem;">₹0</div></div>
+    </div>
+    <div class="mini-box">
+      <h4>Month 3+ Cost (Full Stack)</h4>
+      <div class="cost-row"><div class="cost-label">HubSpot Starter</div><div class="cost-phase">Optional</div><div class="cost-price">₹1,800/mo</div></div>
+      <div class="cost-row"><div class="cost-label">G2 Intent (Comparison)</div><div class="cost-phase">If valuable</div><div class="cost-price">~₹25K/mo</div></div>
+      <div class="cost-row"><div class="cost-label">Apollo.io Basic</div><div class="cost-phase">Recommended</div><div class="cost-price">~₹3,500/mo</div></div>
+      <div class="cost-row"><div class="cost-label">Zapier Starter</div><div class="cost-phase">When scaling</div><div class="cost-price">~₹1,700/mo</div></div>
+      <div class="cost-row"><div class="cost-label">Bombora (via HubSpot)</div><div class="cost-phase">After validating</div><div class="cost-price">~₹42K/mo</div></div>
+      <div class="cost-row" style="border-top:2px solid var(--ink);margin-top:.5rem;padding-top:.75rem;"><div class="cost-label" style="font-weight:600;">Full Stack Total</div><div class="cost-phase"></div><div class="cost-price" style="color:var(--amber);font-size:1rem;">~₹74K/mo</div></div>
+    </div>
+  </div>
+
+  <!-- ── ROADMAP ── -->
+  <div class="divider"><div class="divider-line"></div><div class="divider-label">8-Week Execution Roadmap</div><div class="divider-line"></div></div>
+
+  <div class="roadmap">
+    <div class="rm-item">
+      <div class="rm-week p1"><span>Week 1</span></div>
+      <div class="rm-content">
+        <div class="rpm-1">Phase 1 · Foundation</div>
+        <h4>Hub Setup + First Data Flow</h4>
+        <p>Create HubSpot CRM → Add 6 custom intent fields → Import TAL → Build Google Sheet (8 tabs) → Add scoring formulas → Claim G2 profile → Sign up Apollo.io → Do first manual export to test the flow</p>
+      </div>
+    </div>
+    <div class="rm-item">
+      <div class="rm-week p1"><span>Week 2</span></div>
+      <div class="rm-content">
+        <div class="rpm-1">Phase 2 · Connect Sources</div>
+        <h4>Free Sources Connected</h4>
+        <p>Connect G2 → HubSpot (native) → Connect Apollo → HubSpot (native) → Install LinkedIn Insight Tag → Set up Zapier LinkedIn Lead Form automation → List on Clutch.co → Set up Clutch email parser → First full weekly export cycle run</p>
+      </div>
+    </div>
+    <div class="rm-item">
+      <div class="rm-week p2"><span>Week 3</span></div>
+      <div class="rm-content">
+        <div class="rpm-2">Phase 2 · Paid Sources</div>
+        <h4>Bombora Trial + ZoomInfo Setup</h4>
+        <p>Request Bombora trial via HubSpot Marketplace → Configure surge topics → Upload TAL to Bombora → Start ZoomInfo 14-day trial → Configure intent topics → Connect ZoomInfo → HubSpot. First time all 6 sources are flowing.</p>
+      </div>
+    </div>
+    <div class="rm-item">
+      <div class="rm-week p2"><span>Week 4</span></div>
+      <div class="rm-content">
+        <div class="rpm-2">Phase 2 · Validate</div>
+        <h4>First Full Data Cycle Review</h4>
+        <p>Run first complete Monday morning export routine with all 6 sources → Compare accounts identified across sources (overlap analysis) → Validate scores feel right → Adjust point values if needed → Brief sales team on how to use the High Intent view in HubSpot</p>
+      </div>
+    </div>
+    <div class="rm-item">
+      <div class="rm-week p3"><span>Week 5</span></div>
+      <div class="rm-content">
+        <div class="rpm-3">Phase 3 · Automate</div>
+        <h4>All 4 Zapier Workflows Live</h4>
+        <p>Build Zap #1 (Sheet → HubSpot weekly sync) → Build Zap #2 (Daily Slack digest) → Build Zap #3 (High Intent → CRM task + email sequence) → Build Zap #4 (Intent spike alert) → Test all automations end-to-end with dummy data</p>
+      </div>
+    </div>
+    <div class="rm-item">
+      <div class="rm-week p3"><span>Week 6</span></div>
+      <div class="rm-content">
+        <div class="rpm-3">Phase 3 · Dashboard</div>
+        <h4>Live Dashboards for Both Teams</h4>
+        <p>Build HubSpot dashboard (sales view) → Build Looker Studio dashboard (marketing view) → Get shareable link → Share with team → Run first team demo of the full system → Establish weekly Monday morning review ritual</p>
+      </div>
+    </div>
+    <div class="rm-item">
+      <div class="rm-week p4"><span>Week 7–8</span></div>
+      <div class="rm-content">
+        <div class="rpm-4">Phase 4 · Optimise</div>
+        <h4>Measure Results + Calibrate</h4>
+        <p>Track: How many High Intent accounts were called? How many booked meetings? Which source had the best meeting rate? Adjust scoring model weights → Decide Bombora/ZoomInfo full subscription vs. cancel → Plan 2nd party signal layer (website + email = Phase 2 of the engine)</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── QUICK START ── -->
+  <div class="quickstart">
+    <div class="qs-title">Start in the Next 2 Hours</div>
+    <div class="qs-sub">Everything you need to do today to get the engine running</div>
+    <div class="qs-steps">
+      <div class="qs-step"><div class="qs-n">1</div><div class="qs-text">Go to <strong>hubspot.com</strong> → Create free account → Settings → Properties → Add the 6 intent fields listed in Step 1 <em>(20 minutes)</em></div></div>
+      <div class="qs-step"><div class="qs-n">2</div><div class="qs-text">Go to <strong>sheets.google.com</strong> → Create "Younion Intent Master" sheet → Add 8 tabs as listed in Step 2 → Add column headers in MASTER_INTENT <em>(30 minutes)</em></div></div>
+      <div class="qs-step"><div class="qs-n">3</div><div class="qs-text">Go to <strong>g2.com</strong> → Claim Younion profile → Fill company info → Enable HubSpot integration → Done <em>(30 minutes)</em></div></div>
+      <div class="qs-step"><div class="qs-n">4</div><div class="qs-text">Go to <strong>apollo.io</strong> → Sign up free → Set ICP filters (CMO/Marketing Head at FMCG/BFSI companies India) → Export first 100 contacts → Paste into APOLLO_RAW tab <em>(20 minutes)</em></div></div>
+      <div class="qs-step"><div class="qs-n">5</div><div class="qs-text">Go to <strong>clutch.co</strong> → Create listing → Add services: "Event Management, Brand Activation, Experiential Marketing, Corporate Events Bangalore" → Done <em>(20 minutes)</em></div></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  <span>YOUNION · Integration Execution Plan · DOC-INT-001</span>
+  <span>Bengaluru, India · 2025 · Build in 8 Weeks</span>
+</div>
+
+<script>
+function toggleCheck(el) {
+  el.classList.toggle('done');
+  el.textContent = el.classList.contains('done') ? '✓' : '';
+  // Update progress
+  const allChecks = document.querySelectorAll('.task-check');
+  const done = document.querySelectorAll('.task-check.done').length;
+  const pct = Math.round((done / allChecks.length) * 100);
+  // Could show a progress bar — for now just track state
+}
+</script>
+</body>
+</html>
