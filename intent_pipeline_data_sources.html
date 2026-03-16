@@ -1,0 +1,259 @@
+
+<style>
+  .pipeline { font-family: var(--font-sans); padding: 16px 0; }
+  .stage { margin-bottom: 8px; }
+  .stage-header { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-radius: 8px; margin-bottom: 8px; }
+  .stage-num { font-size: 11px; font-weight: 500; opacity: 0.7; min-width: 20px; }
+  .stage-title { font-size: 14px; font-weight: 500; }
+  .cards { display: grid; gap: 8px; padding: 0 4px 4px 4px; }
+  .cards-2 { grid-template-columns: 1fr 1fr; }
+  .cards-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .cards-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+  .card { background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: 8px; padding: 10px 12px; }
+  .card-name { font-size: 13px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 3px; }
+  .card-desc { font-size: 12px; color: var(--color-text-secondary); line-height: 1.4; }
+  .card-tag { display: inline-block; font-size: 11px; font-weight: 500; padding: 2px 7px; border-radius: 10px; margin-top: 5px; }
+  .tag-free { background: #EAF3DE; color: #3B6D11; }
+  .tag-low { background: #FAEEDA; color: #854F0B; }
+  .tag-paid { background: #FAECE7; color: #993C1D; }
+  .tag-enterprise { background: #EEEDFE; color: #534AB7; }
+  .arrow-row { display: flex; justify-content: center; align-items: center; height: 24px; color: var(--color-text-tertiary); font-size: 18px; }
+
+  .h-purple { background: #EEEDFE; }
+  .h-teal   { background: #E1F5EE; }
+  .h-blue   { background: #E6F1FB; }
+  .h-coral  { background: #FAECE7; }
+  .h-amber  { background: #FAEEDA; }
+  .h-green  { background: #EAF3DE; }
+
+  .t-purple { color: #3C3489; }
+  .t-teal   { color: #085041; }
+  .t-blue   { color: #0C447C; }
+  .t-coral  { color: #712B13; }
+  .t-amber  { color: #633806; }
+  .t-green  { color: #27500A; }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 10px; padding: 12px 16px; background: var(--color-background-secondary); border-radius: 8px; margin-top: 12px; }
+  .leg-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--color-text-secondary); }
+  .leg-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+  @media (prefers-color-scheme: dark) {
+    .tag-free { background: #173404; color: #C0DD97; }
+    .tag-low  { background: #412402; color: #FAC775; }
+    .tag-paid { background: #4A1B0C; color: #F5C4B3; }
+    .tag-enterprise { background: #26215C; color: #CECBF6; }
+    .h-purple { background: #26215C; }
+    .h-teal   { background: #04342C; }
+    .h-blue   { background: #042C53; }
+    .h-coral  { background: #4A1B0C; }
+    .h-amber  { background: #412402; }
+    .h-green  { background: #173404; }
+    .t-purple { color: #CECBF6; }
+    .t-teal   { color: #9FE1CB; }
+    .t-blue   { color: #B5D4F4; }
+    .t-coral  { color: #F5C4B3; }
+    .t-amber  { color: #FAC775; }
+    .t-green  { color: #C0DD97; }
+  }
+</style>
+
+<div class="pipeline">
+
+  <div class="stage">
+    <div class="stage-header h-purple">
+      <span class="stage-num t-purple">01</span>
+      <span class="stage-title t-purple">Company resolution</span>
+    </div>
+    <div class="cards cards-4">
+      <div class="card">
+        <div class="card-name">Clearbit</div>
+        <div class="card-desc">Domain → firmographics, tech stack, headcount</div>
+        <span class="card-tag tag-paid">Paid</span>
+      </div>
+      <div class="card">
+        <div class="card-name">Apollo.io</div>
+        <div class="card-desc">Company + contact enrichment API</div>
+        <span class="card-tag tag-low">Free tier</span>
+      </div>
+      <div class="card">
+        <div class="card-name">Hunter.io</div>
+        <div class="card-desc">Domain → email pattern discovery</div>
+        <span class="card-tag tag-low">Low cost</span>
+      </div>
+      <div class="card">
+        <div class="card-name">People Data Labs</div>
+        <div class="card-desc">Enrichment API, 1.5B+ profiles</div>
+        <span class="card-tag tag-paid">Paid</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow-row">↓</div>
+
+  <div class="stage">
+    <div class="stage-header h-teal">
+      <span class="stage-num t-teal">02</span>
+      <span class="stage-title t-teal">Employee discovery</span>
+    </div>
+    <div class="cards cards-3">
+      <div class="card">
+        <div class="card-name">LinkedIn Sales Navigator</div>
+        <div class="card-desc">Filter by title, dept, seniority. Use Proxycurl API to scrape profiles legally.</div>
+        <span class="card-tag tag-paid">Paid</span>
+      </div>
+      <div class="card">
+        <div class="card-name">GitHub Search API</div>
+        <div class="card-desc">Find employees via org membership. <code style="font-size:11px">GET /search/users?q=org:stripe</code></div>
+        <span class="card-tag tag-free">Free</span>
+      </div>
+      <div class="card">
+        <div class="card-name">Apollo / ZoomInfo</div>
+        <div class="card-desc">Pre-built employee lists, filter by ICP role titles and departments</div>
+        <span class="card-tag tag-low">Free tier</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow-row">↓</div>
+
+  <div class="stage">
+    <div class="stage-header h-blue">
+      <span class="stage-num t-blue">03</span>
+      <span class="stage-title t-blue">Activity collection</span>
+    </div>
+    <div class="cards cards-4">
+      <div class="card">
+        <div class="card-name">GitHub Events API</div>
+        <div class="card-desc">Commits, PRs, starred repos per user. Real-time intent signals.</div>
+        <span class="card-tag tag-free">Free</span>
+      </div>
+      <div class="card">
+        <div class="card-name">Proxycurl Posts</div>
+        <div class="card-desc">LinkedIn post text + timestamps via REST API</div>
+        <span class="card-tag tag-paid">Paid</span>
+      </div>
+      <div class="card">
+        <div class="card-name">RSS / Blog crawlers</div>
+        <div class="card-desc">Poll engineering blogs with feedparser. company.com/blog/feed.xml</div>
+        <span class="card-tag tag-free">Free</span>
+      </div>
+      <div class="card">
+        <div class="card-name">Twitter/X API v2</div>
+        <div class="card-desc">Search tweets by handle or domain mention</div>
+        <span class="card-tag tag-low">Low cost</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow-row">↓</div>
+
+  <div class="stage">
+    <div class="stage-header h-coral">
+      <span class="stage-num t-coral">04 + 05</span>
+      <span class="stage-title t-coral">Signal collection + entity extraction</span>
+    </div>
+    <div class="cards cards-3">
+      <div class="card">
+        <div class="card-name">spaCy / NLTK</div>
+        <div class="card-desc">Named entity recognition — person, org, technology mentions. Runs locally.</div>
+        <span class="card-tag tag-free">Free / open source</span>
+      </div>
+      <div class="card">
+        <div class="card-name">Claude / OpenAI API</div>
+        <div class="card-desc">LLM-based intent tagging. Returns structured JSON: topic, stage, keywords.</div>
+        <span class="card-tag tag-low">Low cost</span>
+      </div>
+      <div class="card">
+        <div class="card-name">Keyword taxonomy</div>
+        <div class="card-desc">Custom dictionary + regex. Fast, zero API cost, easy to tune per product.</div>
+        <span class="card-tag tag-free">Free</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow-row">↓</div>
+
+  <div class="stage">
+    <div class="stage-header h-amber">
+      <span class="stage-num t-amber">06</span>
+      <span class="stage-title t-amber">Buying committee detection</span>
+    </div>
+    <div class="cards cards-3">
+      <div class="card">
+        <div class="card-name">Apollo / ZoomInfo</div>
+        <div class="card-desc">Role hierarchy, department, seniority inference from title</div>
+        <span class="card-tag tag-low">Free tier</span>
+      </div>
+      <div class="card">
+        <div class="card-name">Proxycurl LinkedIn</div>
+        <div class="card-desc">Org chart, reporting structure, connection graph</div>
+        <span class="card-tag tag-paid">Paid</span>
+      </div>
+      <div class="card">
+        <div class="card-name">Title → role classifier</div>
+        <div class="card-desc">Custom ML model or LLM prompt mapping title to champion / buyer / user</div>
+        <span class="card-tag tag-free">Free / custom</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow-row">↓</div>
+
+  <div class="stage">
+    <div class="stage-header h-green">
+      <span class="stage-num t-green">07 + 08</span>
+      <span class="stage-title t-green">Feature engineering + intent scoring</span>
+    </div>
+    <div class="cards cards-3">
+      <div class="card">
+        <div class="card-name">pandas + scikit-learn</div>
+        <div class="card-desc">Feature transforms, logistic regression, scoring pipeline</div>
+        <span class="card-tag tag-free">Free / open source</span>
+      </div>
+      <div class="card">
+        <div class="card-name">Bombora / G2</div>
+        <div class="card-desc">3rd-party intent data. Topic surge scores by account and keyword.</div>
+        <span class="card-tag tag-enterprise">Enterprise</span>
+      </div>
+      <div class="card">
+        <div class="card-name">6sense / Demandbase</div>
+        <div class="card-desc">Pre-built intent platform with API + webhook push to CRM</div>
+        <span class="card-tag tag-enterprise">Enterprise</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow-row">↓</div>
+
+  <div class="stage">
+    <div class="stage-header h-purple">
+      <span class="stage-num t-purple">09 + 10</span>
+      <span class="stage-title t-purple">Predictive model + CRM output</span>
+    </div>
+    <div class="cards cards-3">
+      <div class="card">
+        <div class="card-name">scikit-learn / XGBoost</div>
+        <div class="card-desc">Train on historical won/lost deals from CRM data</div>
+        <span class="card-tag tag-free">Free / open source</span>
+      </div>
+      <div class="card">
+        <div class="card-name">Salesforce API</div>
+        <div class="card-desc">Push hot accounts + contacts, create tasks for AEs automatically</div>
+        <span class="card-tag tag-paid">Paid</span>
+      </div>
+      <div class="card">
+        <div class="card-name">HubSpot / Outreach</div>
+        <div class="card-desc">Enroll accounts in sequences via webhook trigger</div>
+        <span class="card-tag tag-paid">Paid</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <div class="leg-item"><div class="leg-dot" style="background:#639922"></div> Free / open source</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#BA7517"></div> Low cost / free tier</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#993C1D"></div> Paid subscription</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#534AB7"></div> Enterprise platform</div>
+  </div>
+
+</div>
