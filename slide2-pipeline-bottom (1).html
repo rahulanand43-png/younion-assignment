@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Intent Pipeline — Part 2</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #FFFFFF;
+    --surface: #F8F9FB;
+    --surface2: #EFF1F5;
+    --border: rgba(0,0,0,0.08);
+    --border-bright: rgba(0,0,0,0.18);
+    --text: #111318;
+    --muted: #6B7280;
+    --faint: #C8CDD8;
+
+    --col-c: #D95F10;
+    --col-c-dim: rgba(217,95,16,0.08);
+    --col-d: #B07D10;
+    --col-d-dim: rgba(176,125,16,0.08);
+    --col-e: #1A6FD4;
+    --col-e-dim: rgba(26,111,212,0.08);
+    --col-f: #B03090;
+    --col-f-dim: rgba(176,48,144,0.08);
+    --col-g: #1A8C45;
+    --col-g-dim: rgba(26,140,69,0.08);
+
+    --font-mono: 'IBM Plex Mono', monospace;
+    --font-sans: 'IBM Plex Sans', sans-serif;
+  }
+
+  html, body {
+    width: 1280px; height: 720px;
+    overflow: hidden;
+    background: var(--bg);
+    font-family: var(--font-sans);
+    color: var(--text);
+  }
+
+  body::before { display: none; }
+  body::after { display: none; }
+
+  .slide {
+    position: relative; z-index: 1;
+    width: 1280px; height: 720px;
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    padding: 36px 40px;
+    gap: 32px;
+  }
+
+  /* ── LEFT LEGEND ── */
+  .legend {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+  }
+  .slide-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: .14em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .legend-title {
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .legend-sub {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--muted);
+    font-family: var(--font-mono);
+  }
+  .legend-dot {
+    width: 8px; height: 8px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+  .slide-num {
+    margin-top: auto;
+    font-family: var(--font-mono);
+    font-size: 32px;
+    font-weight: 600;
+    color: var(--faint);
+    letter-spacing: -.02em;
+  }
+
+  /* ── PIPELINE ── */
+  .pipeline {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0;
+  }
+
+  .phase {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .phase-badge {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 4px;
+    border: 1px solid;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .phase-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .row { display: flex; gap: 8px; margin-bottom: 4px; }
+
+  .node {
+    flex: 1;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+    padding: 10px 12px;
+    position: relative;
+    overflow: hidden;
+  }
+  .node::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+    border-radius: 10px 0 0 10px;
+  }
+
+  .node.col-c { border-color: rgba(249,115,22,0.2); }
+  .node.col-c::before { background: var(--col-c); }
+  .node.col-c .node-bg { background: var(--col-c-dim); }
+
+  .node.col-d { border-color: rgba(251,191,36,0.2); }
+  .node.col-d::before { background: var(--col-d); }
+  .node.col-d .node-bg { background: var(--col-d-dim); }
+
+  .node.col-e { border-color: rgba(96,165,250,0.2); }
+  .node.col-e::before { background: var(--col-e); }
+  .node.col-e .node-bg { background: var(--col-e-dim); }
+
+  .node.col-f { border-color: rgba(244,114,182,0.2); }
+  .node.col-f::before { background: var(--col-f); }
+  .node.col-f .node-bg { background: var(--col-f-dim); }
+
+  .node.col-g { border-color: rgba(74,222,128,0.2); }
+  .node.col-g::before { background: var(--col-g); }
+  .node.col-g .node-bg { background: var(--col-g-dim); }
+
+  .node-bg {
+    position: absolute;
+    top: -30px; right: -30px;
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    opacity: .4;
+    pointer-events: none;
+  }
+
+  .node-icon {
+    font-size: 11px;
+    margin-bottom: 4px;
+    display: block;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    letter-spacing: -.01em;
+  }
+  .node.col-c .node-icon { color: var(--col-c); }
+  .node.col-d .node-icon { color: var(--col-d); }
+  .node.col-e .node-icon { color: var(--col-e); }
+  .node.col-f .node-icon { color: var(--col-f); }
+  .node.col-g .node-icon { color: var(--col-g); }
+
+  .node-title {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 3px;
+    line-height: 1.3;
+  }
+  .node-desc {
+    font-size: 9.5px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .node-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
+    margin-top: 6px;
+  }
+  .chip {
+    font-family: var(--font-mono);
+    font-size: 8.5px;
+    padding: 2px 5px;
+    border-radius: 3px;
+    background: var(--surface2);
+    color: var(--muted);
+    border: 1px solid var(--border);
+    letter-spacing: .03em;
+  }
+
+  .connector {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 18px;
+    margin: 0 auto;
+    width: 2px;
+    position: relative;
+  }
+  .connector::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 50%;
+    width: 1px; height: 10px;
+    background: var(--border-bright);
+  }
+  .connector::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 0; height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 5px solid var(--border-bright);
+  }
+
+  /* ENRICHMENT GRID */
+  .enrich-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    margin-bottom: 4px;
+  }
+  .enrich-card {
+    border: 1px solid rgba(249,115,22,0.15);
+    border-radius: 8px;
+    background: var(--surface);
+    padding: 9px 10px;
+    position: relative;
+    overflow: hidden;
+  }
+  .enrich-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 2px;
+    background: var(--col-c);
+    opacity: .5;
+  }
+  .enrich-num {
+    font-family: var(--font-mono);
+    font-size: 8.5px;
+    color: var(--col-c);
+    letter-spacing: .08em;
+    margin-bottom: 3px;
+  }
+  .enrich-title {
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+  .enrich-desc {
+    font-size: 9px;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+
+  /* MODEL PROBABILITY DISPLAY */
+  .prob-display {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 6px;
+  }
+  .prob-bar-wrap {
+    flex: 1;
+    height: 6px;
+    background: var(--surface2);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .prob-bar {
+    height: 100%;
+    border-radius: 3px;
+    background: linear-gradient(90deg, var(--col-f), #9333ea);
+    width: 73%;
+  }
+  .prob-label {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--col-f);
+    white-space: nowrap;
+  }
+
+  /* OUTPUT ROW */
+  .output-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+  }
+  .output-card {
+    border-radius: 8px;
+    background: var(--surface);
+    border: 1px solid rgba(74,222,128,0.15);
+    padding: 10px 10px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .output-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 100%; height: 2px;
+    background: var(--col-g);
+    opacity: .5;
+  }
+  .output-icon { font-size: 20px; margin-bottom: 4px; }
+  .output-title {
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--text);
+    display: block;
+    margin-bottom: 2px;
+  }
+  .output-sub {
+    font-size: 9px;
+    color: var(--muted);
+    font-family: var(--font-mono);
+  }
+</style>
+</head>
+<body>
+<div class="slide">
+
+  <!-- LEFT: LEGEND -->
+  <div class="legend">
+    <div>
+      <div class="slide-label">Intent Pipeline · 02 / 02</div>
+      <div class="legend-title">Intelligence<br/>& Activation</div>
+      <div class="legend-sub">Signal enrichment through to sales activation and output</div>
+
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--col-c)"></div>Enrichment</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--col-d)"></div>Feature eng.</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--col-e)"></div>ML core</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--col-f)"></div>Prediction</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--col-g)"></div>Output channels</div>
+      </div>
+    </div>
+    <div class="slide-num">02</div>
+  </div>
+
+  <!-- RIGHT: PIPELINE -->
+  <div class="pipeline">
+
+    <!-- ENRICHMENT PHASE -->
+    <div class="phase">
+      <div class="phase-badge" style="color:var(--col-c);border-color:rgba(249,115,22,0.3);background:rgba(249,115,22,0.08)">Signal Enrichment</div>
+      <div class="phase-line"></div>
+    </div>
+
+    <div class="enrich-grid">
+      <div class="enrich-card">
+        <div class="enrich-num">06.A</div>
+        <div class="enrich-title">Employee discovery</div>
+        <div class="enrich-desc">LinkedIn, org charts, committee mapping</div>
+      </div>
+      <div class="enrich-card">
+        <div class="enrich-num">06.B</div>
+        <div class="enrich-title">GitHub signals</div>
+        <div class="enrich-desc">Commits, repos, stars, dependency graph</div>
+      </div>
+      <div class="enrich-card">
+        <div class="enrich-num">06.C</div>
+        <div class="enrich-title">Job postings</div>
+        <div class="enrich-desc">Hiring velocity, role type, seniority</div>
+      </div>
+      <div class="enrich-card">
+        <div class="enrich-num">06.D</div>
+        <div class="enrich-title">Tech install detection</div>
+        <div class="enrich-desc">BuiltWith, Wappalyzer, header analysis</div>
+      </div>
+      <div class="enrich-card">
+        <div class="enrich-num">06.E</div>
+        <div class="enrich-title">News mentions</div>
+        <div class="enrich-desc">Funding rounds, M&A, leadership changes</div>
+      </div>
+      <div class="enrich-card">
+        <div class="enrich-num">06.F</div>
+        <div class="enrich-title">Hiring signals</div>
+        <div class="enrich-desc">Headcount growth, budget indicators</div>
+      </div>
+    </div>
+
+    <div class="connector"></div>
+
+    <!-- FEATURE ENGINEERING -->
+    <div class="phase">
+      <div class="phase-badge" style="color:var(--col-d);border-color:rgba(251,191,36,0.3);background:rgba(251,191,36,0.08)">Feature Engineering</div>
+      <div class="phase-line"></div>
+    </div>
+
+    <div class="row">
+      <div class="node col-d">
+        <div class="node-bg"></div>
+        <div class="node-icon">07 — Feature Engineering</div>
+        <div class="node-title">Numerical signal composition</div>
+        <div class="node-chips">
+          <span class="chip">Committee size</span>
+          <span class="chip">Velocity</span>
+          <span class="chip">Recency decay</span>
+          <span class="chip">Role weight</span>
+          <span class="chip">Tech mentions</span>
+          <span class="chip">Hiring activity</span>
+          <span class="chip">Dev signals</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="connector"></div>
+
+    <!-- ML CORE -->
+    <div class="phase">
+      <div class="phase-badge" style="color:var(--col-e);border-color:rgba(96,165,250,0.3);background:rgba(96,165,250,0.08)">ML Core</div>
+      <div class="phase-line"></div>
+    </div>
+
+    <div class="row">
+      <div class="node col-e">
+        <div class="node-bg"></div>
+        <div class="node-icon">08 — Intent Engine</div>
+        <div class="node-title">Stage detection + intent scoring</div>
+        <div class="node-chips">
+          <span class="chip">Awareness</span>
+          <span class="chip">Evaluation</span>
+          <span class="chip">Decision</span>
+          <span class="chip">Rule-based heuristics</span>
+          <span class="chip">Learned patterns</span>
+        </div>
+      </div>
+      <div class="node col-e">
+        <div class="node-bg"></div>
+        <div class="node-icon">09 — Feature Store</div>
+        <div class="node-title">Training + scoring data</div>
+        <div class="node-chips">
+          <span class="chip">Point-in-time correct</span>
+          <span class="chip">Feature versioning</span>
+          <span class="chip">Online / offline</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="connector"></div>
+
+    <!-- PREDICTIVE MODEL -->
+    <div class="phase">
+      <div class="phase-badge" style="color:var(--col-f);border-color:rgba(244,114,182,0.3);background:rgba(244,114,182,0.08)">Prediction</div>
+      <div class="phase-line"></div>
+    </div>
+
+    <div class="row">
+      <div class="node col-f" style="padding-bottom:12px;">
+        <div class="node-bg"></div>
+        <div class="node-icon">10 — Predictive Model</div>
+        <div class="node-title">P(company will buy) — probability scoring across TAM</div>
+        <div class="prob-display">
+          <div class="prob-bar-wrap"><div class="prob-bar"></div></div>
+          <div class="prob-label">73% intent</div>
+        </div>
+        <div class="node-chips" style="margin-top:8px;">
+          <span class="chip">Gradient boosting</span>
+          <span class="chip">Prob. calibration</span>
+          <span class="chip">Continuous retraining</span>
+          <span class="chip">Explainability</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="connector"></div>
+
+    <!-- OUTPUT CHANNELS -->
+    <div class="phase">
+      <div class="phase-badge" style="color:var(--col-g);border-color:rgba(74,222,128,0.3);background:rgba(74,222,128,0.08)">Alerting & Output</div>
+      <div class="phase-line"></div>
+    </div>
+
+    <div class="output-grid">
+      <div class="output-card">
+        <div class="output-icon">🗂️</div>
+        <span class="output-title">CRM</span>
+        <div class="output-sub">Salesforce · HubSpot</div>
+      </div>
+      <div class="output-card">
+        <div class="output-icon">📊</div>
+        <span class="output-title">Power BI</span>
+        <div class="output-sub">Exec dashboards</div>
+      </div>
+      <div class="output-card">
+        <div class="output-icon">⚡</div>
+        <span class="output-title">Sales alerts</span>
+        <div class="output-sub">Slack · Email</div>
+      </div>
+      <div class="output-card">
+        <div class="output-icon">🔍</div>
+        <span class="output-title">Dashboards</span>
+        <div class="output-sub">RevOps analytics</div>
+      </div>
+    </div>
+
+  </div><!-- /pipeline -->
+</div><!-- /slide -->
+</body>
+</html>

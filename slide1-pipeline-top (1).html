@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Intent Pipeline — Part 1</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #FFFFFF;
+    --surface: #F8F9FB;
+    --surface2: #EFF1F5;
+    --border: rgba(0,0,0,0.08);
+    --border-bright: rgba(0,0,0,0.18);
+    --text: #111318;
+    --muted: #6B7280;
+    --faint: #C8CDD8;
+
+    --col-a: #5B4EE0;
+    --col-a-dim: rgba(91,78,224,0.08);
+    --col-b: #0D9E6A;
+    --col-b-dim: rgba(13,158,106,0.08);
+    --col-c: #D95F10;
+    --col-c-dim: rgba(217,95,16,0.08);
+
+    --font-mono: 'IBM Plex Mono', monospace;
+    --font-sans: 'IBM Plex Sans', sans-serif;
+  }
+
+  html, body {
+    width: 1280px; height: 720px;
+    overflow: hidden;
+    background: var(--bg);
+    font-family: var(--font-sans);
+    color: var(--text);
+  }
+
+  body::before { display: none; }
+  body::after { display: none; }
+
+  .slide {
+    position: relative; z-index: 1;
+    width: 1280px; height: 720px;
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    grid-template-rows: 1fr;
+    padding: 36px 40px;
+    gap: 32px;
+  }
+
+  /* ── LEFT LEGEND ── */
+  .legend {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .slide-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: .14em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .legend-title {
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .legend-sub {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--muted);
+    font-family: var(--font-mono);
+  }
+  .legend-dot {
+    width: 8px; height: 8px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  .slide-num {
+    margin-top: auto;
+    font-family: var(--font-mono);
+    font-size: 32px;
+    font-weight: 600;
+    color: var(--faint);
+    letter-spacing: -.02em;
+  }
+
+  /* ── PIPELINE ── */
+  .pipeline {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0;
+  }
+
+  /* PHASE HEADER */
+  .phase {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .phase-badge {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 4px;
+    border: 1px solid;
+    font-weight: 600;
+  }
+  .phase-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ROW WRAPPER */
+  .row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+  .row.single { flex-direction: column; }
+
+  /* NODE CARD */
+  .node {
+    flex: 1;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+    padding: 12px 14px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color .2s, background .2s;
+  }
+  .node::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+    border-radius: 10px 0 0 10px;
+  }
+
+  .node.col-a { border-color: rgba(124,110,245,0.2); }
+  .node.col-a::before { background: var(--col-a); }
+  .node.col-a .node-icon { color: var(--col-a); }
+  .node.col-a .node-bg { background: var(--col-a-dim); }
+
+  .node.col-b { border-color: rgba(52,211,153,0.2); }
+  .node.col-b::before { background: var(--col-b); }
+  .node.col-b .node-icon { color: var(--col-b); }
+  .node.col-b .node-bg { background: var(--col-b-dim); }
+
+  .node.col-c { border-color: rgba(249,115,22,0.2); }
+  .node.col-c::before { background: var(--col-c); }
+  .node.col-c .node-icon { color: var(--col-c); }
+  .node.col-c .node-bg { background: var(--col-c-dim); }
+
+  .node-bg {
+    position: absolute;
+    top: -30px; right: -30px;
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    opacity: .5;
+    pointer-events: none;
+  }
+
+  .node-icon {
+    font-size: 14px;
+    margin-bottom: 6px;
+    display: block;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    letter-spacing: -.01em;
+  }
+
+  .node-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+    line-height: 1.3;
+  }
+  .node-desc {
+    font-size: 10px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .node-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 8px;
+  }
+  .chip {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    background: var(--surface2);
+    color: var(--muted);
+    border: 1px solid var(--border);
+    letter-spacing: .04em;
+  }
+
+  /* CONNECTOR */
+  .connector {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    height: 22px;
+    margin: 0 auto;
+    width: 2px;
+  }
+  .connector::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 50%;
+    width: 1px; height: 14px;
+    background: var(--border-bright);
+  }
+  .connector::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 0; height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 6px solid var(--border-bright);
+  }
+
+  /* SOURCES SPECIAL GRID */
+  .sources-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+  .source-pill {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 7px 10px;
+    font-size: 10px;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    letter-spacing: .03em;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .source-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--col-a);
+    flex-shrink: 0;
+  }
+
+  /* ENTITY ROW */
+  .entity-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+  }
+  .entity-card {
+    background: var(--surface2);
+    border: 1px solid rgba(249,115,22,0.15);
+    border-radius: 8px;
+    padding: 10px 10px;
+    text-align: center;
+  }
+  .entity-icon {
+    font-size: 18px;
+    margin-bottom: 4px;
+  }
+  .entity-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text);
+    display: block;
+  }
+  .entity-sub {
+    font-size: 9px;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    margin-top: 2px;
+  }
+</style>
+</head>
+<body>
+<div class="slide">
+
+  <!-- LEFT: LEGEND -->
+  <div class="legend">
+    <div>
+      <div class="slide-label">Intent Pipeline · 01 / 02</div>
+      <div class="legend-title">Data Acquisition<br/>& Processing</div>
+      <div class="legend-sub">Raw signal collection through to structured entity extraction</div>
+
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div class="legend-item">
+          <div class="legend-dot" style="background:var(--col-a)"></div>
+          Acquisition layer
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:var(--col-b)"></div>
+          Processing layer
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:var(--col-c)"></div>
+          Extraction layer
+        </div>
+      </div>
+    </div>
+
+    <div class="slide-num">01</div>
+  </div>
+
+  <!-- RIGHT: PIPELINE -->
+  <div class="pipeline">
+
+    <!-- PHASE A -->
+    <div class="phase">
+      <div class="phase-badge" style="color:var(--col-a);border-color:rgba(124,110,245,0.3);background:rgba(124,110,245,0.08)">Acquisition</div>
+      <div class="phase-line"></div>
+    </div>
+
+    <!-- DATA SOURCES -->
+    <div class="row">
+      <div class="node col-a" style="padding-bottom:14px;">
+        <div class="node-bg"></div>
+        <div class="node-icon">01 — Data Sources</div>
+        <div class="node-title">Raw intelligence feeds</div>
+        <div class="sources-grid" style="margin-top:8px;">
+          <div class="source-pill"><div class="source-dot"></div>Tech news</div>
+          <div class="source-pill"><div class="source-dot"></div>Social media</div>
+          <div class="source-pill"><div class="source-dot"></div>Blogs</div>
+          <div class="source-pill"><div class="source-dot"></div>GitHub</div>
+          <div class="source-pill"><div class="source-dot"></div>Job boards</div>
+          <div class="source-pill"><div class="source-dot"></div>LinkedIn</div>
+          <div class="source-pill"><div class="source-dot"></div>Forums</div>
+          <div class="source-pill"><div class="source-dot"></div>Hiring signals</div>
+          <div class="source-pill"><div class="source-dot"></div>Install data</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="connector"></div>
+
+    <!-- SIGNAL COLLECTION -->
+    <div class="row">
+      <div class="node col-a">
+        <div class="node-bg"></div>
+        <div class="node-icon">02 — Signal Collection Layer</div>
+        <div class="node-title">Scrapers · APIs · Streaming connectors</div>
+        <div class="node-chips">
+          <span class="chip">REST APIs</span>
+          <span class="chip">Scrapers</span>
+          <span class="chip">Webhooks</span>
+          <span class="chip">Rate limiting</span>
+          <span class="chip">Auth management</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="connector"></div>
+
+    <!-- PHASE B -->
+    <div class="phase">
+      <div class="phase-badge" style="color:var(--col-b);border-color:rgba(52,211,153,0.3);background:rgba(52,211,153,0.08)">Processing</div>
+      <div class="phase-line"></div>
+    </div>
+
+    <!-- STREAM INGESTION + NORMALIZATION row -->
+    <div class="row">
+      <div class="node col-b">
+        <div class="node-bg"></div>
+        <div class="node-icon">03 — Stream / Ingestion</div>
+        <div class="node-title">Event streaming backbone</div>
+        <div class="node-chips">
+          <span class="chip">Apache Kafka</span>
+          <span class="chip">Google Pub/Sub</span>
+          <span class="chip">At-least-once</span>
+        </div>
+      </div>
+      <div class="node col-b">
+        <div class="node-bg"></div>
+        <div class="node-icon">04 — Data Normalization</div>
+        <div class="node-title">Clean · Deduplicate · Detect</div>
+        <div class="node-chips">
+          <span class="chip">HTML cleaning</span>
+          <span class="chip">Deduplication</span>
+          <span class="chip">Lang detect</span>
+          <span class="chip">Schema norm.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="connector"></div>
+
+    <!-- PHASE C -->
+    <div class="phase">
+      <div class="phase-badge" style="color:var(--col-c);border-color:rgba(249,115,22,0.3);background:rgba(249,115,22,0.08)">Extraction</div>
+      <div class="phase-line"></div>
+    </div>
+
+    <!-- ENTITY EXTRACTION -->
+    <div class="row">
+      <div class="node col-c" style="padding-bottom:14px;">
+        <div class="node-bg"></div>
+        <div class="node-icon">05 — Entity Extraction</div>
+        <div class="node-title">NER pipeline — Named Entity Recognition</div>
+        <div class="entity-row" style="margin-top:8px;">
+          <div class="entity-card">
+            <div class="entity-icon">🏢</div>
+            <span class="entity-label">Company</span>
+            <div class="entity-sub">resolution graph</div>
+          </div>
+          <div class="entity-card">
+            <div class="entity-icon">👤</div>
+            <span class="entity-label">Person</span>
+            <div class="entity-sub">de-duplication</div>
+          </div>
+          <div class="entity-card">
+            <div class="entity-icon">💼</div>
+            <span class="entity-label">Role</span>
+            <div class="entity-sub">seniority detect</div>
+          </div>
+          <div class="entity-card">
+            <div class="entity-icon">⚙️</div>
+            <span class="entity-label">Technology</span>
+            <div class="entity-sub">stack mapping</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /pipeline -->
+</div><!-- /slide -->
+</body>
+</html>
