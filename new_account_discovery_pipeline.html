@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=1280"/>
+<title>New Account Discovery Pipeline</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Syne+Mono&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:    #FFFFFF;
+  --s1:    #F5F6FA;
+  --s2:    #ECEEF5;
+  --border:#DDE0EA;
+  --text:  #0F1117;
+  --muted: #6B7280;
+  --faint: #B0B7C8;
+
+  --p:  #5B4EE0; --pl: rgba(91,78,224,.09);
+  --t:  #0A8F5C; --tl: rgba(10,143,92,.09);
+  --o:  #C95310; --ol: rgba(201,83,16,.09);
+  --b:  #1560C8; --bl: rgba(21,96,200,.09);
+  --pk: #9B2780; --pkl:rgba(155,39,128,.09);
+  --g:  #2D7A1F; --gl: rgba(45,122,31,.10);
+
+  --font:'Syne',sans-serif;
+  --mono:'Syne Mono',monospace;
+}
+
+html,body{
+  width:1280px;height:720px;
+  overflow:hidden;
+  background:#E8EAF0;
+  font-family:var(--font);
+  color:var(--text);
+  display:flex;align-items:center;justify-content:center;
+}
+
+.slide{
+  width:1280px;height:720px;
+  background:var(--bg);
+  display:grid;
+  grid-template-rows:64px 1fr;
+  position:relative;
+  overflow:hidden;
+}
+
+.slide::before{
+  content:'';
+  position:absolute;inset:0;
+  background-image:radial-gradient(circle,#C4C8D6 1px,transparent 1px);
+  background-size:26px 26px;
+  opacity:.4;
+  pointer-events:none;
+}
+
+/* ── HEADER ── */
+.header{
+  position:relative;z-index:2;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 32px;
+  border-bottom:1px solid var(--border);
+  background:var(--s1);
+}
+.header-left{display:flex;align-items:center;gap:16px}
+.header-title{
+  font-size:14px;font-weight:800;
+  letter-spacing:.07em;text-transform:uppercase;
+  color:var(--text);
+}
+.header-divider{width:1px;height:20px;background:var(--border)}
+.header-sub{
+  font-family:var(--mono);font-size:10px;
+  color:var(--muted);letter-spacing:.06em;
+}
+.legend{display:flex;gap:16px;align-items:center}
+.leg{
+  display:flex;align-items:center;gap:5px;
+  font-family:var(--mono);font-size:10px;color:var(--muted);
+}
+.leg-pip{
+  width:20px;height:3px;border-radius:2px;
+  background:var(--lc);
+}
+
+/* ── BODY ── */
+.body{
+  position:relative;z-index:1;
+  display:grid;
+  grid-template-columns:152px 1fr;
+  height:100%;
+}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  background:var(--s1);
+}
+.phase{
+  flex:1;
+  display:flex;align-items:center;
+  padding:0 0 0 18px;
+  gap:10px;
+  border-bottom:1px solid var(--border);
+  position:relative;
+}
+.phase:last-child{border-bottom:none}
+.phase-bar{
+  width:3px;height:55%;border-radius:2px;
+  background:var(--pc);flex-shrink:0;
+}
+.phase-label{
+  font-size:9.5px;font-weight:700;
+  letter-spacing:.09em;text-transform:uppercase;
+  color:var(--pc);line-height:1.45;
+}
+
+/* ── GRID ── */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(11,1fr);
+  grid-template-rows:repeat(6,1fr);
+  position:relative;
+}
+
+/* row dividers */
+.grid::before{
+  content:'';
+  position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(to bottom,
+    transparent calc(16.666% - 0.5px),var(--border) calc(16.666% - 0.5px),var(--border) 16.666%,
+    transparent 16.666%,
+    transparent calc(33.333% - 0.5px),var(--border) calc(33.333% - 0.5px),var(--border) 33.333%,
+    transparent 33.333%,
+    transparent calc(50% - 0.5px),var(--border) calc(50% - 0.5px),var(--border) 50%,
+    transparent 50%,
+    transparent calc(66.666% - 0.5px),var(--border) calc(66.666% - 0.5px),var(--border) 66.666%,
+    transparent 66.666%,
+    transparent calc(83.333% - 0.5px),var(--border) calc(83.333% - 0.5px),var(--border) 83.333%,
+    transparent 83.333%
+  );
+}
+
+.cell{
+  padding:8px 10px;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;
+}
+
+/* arrow connector cell */
+.arr{
+  display:flex;align-items:center;justify-content:center;
+  color:var(--faint);font-size:13px;font-family:var(--mono);
+  padding:0;
+}
+
+/* node card */
+.node{
+  width:100%;
+  background:var(--bg);
+  border:1px solid var(--border);
+  border-radius:7px;
+  padding:9px 11px;
+  position:relative;
+  overflow:hidden;
+  transition:border-color .15s,transform .12s;
+  cursor:default;
+}
+.node:hover{
+  border-color:var(--nc);
+  transform:translateY(-2px);
+}
+.node::after{
+  content:'';
+  position:absolute;
+  top:0;left:0;right:0;height:2px;
+  background:var(--nc);
+}
+.nn{
+  font-family:var(--mono);font-size:8.5px;
+  color:var(--nc);letter-spacing:.1em;
+  margin-bottom:4px;
+}
+.nt{
+  font-size:11px;font-weight:700;
+  color:var(--text);line-height:1.2;
+  margin-bottom:3px;
+}
+.ns{
+  font-size:8.5px;color:var(--muted);
+  font-weight:400;line-height:1.4;
+}
+
+/* output node — filled accent */
+.node.out{
+  background:var(--gl);
+  border-color:var(--g);
+}
+.node.out .nt{color:var(--g)}
+.node.out::after{background:var(--g)}
+</style>
+</head>
+<body>
+<div class="slide">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-left">
+      <div class="header-title">New Account Discovery Pipeline</div>
+      <div class="header-divider"></div>
+      <div class="header-sub">Topic input → buying intent → account activation</div>
+    </div>
+    <div class="legend">
+      <div class="leg"><div class="leg-pip" style="--lc:var(--p)"></div>Input</div>
+      <div class="leg"><div class="leg-pip" style="--lc:var(--t)"></div>Collection</div>
+      <div class="leg"><div class="leg-pip" style="--lc:var(--o)"></div>Extraction</div>
+      <div class="leg"><div class="leg-pip" style="--lc:var(--b)"></div>Enrichment</div>
+      <div class="leg"><div class="leg-pip" style="--lc:var(--pk)"></div>Scoring</div>
+      <div class="leg"><div class="leg-pip" style="--lc:var(--g)"></div>Output</div>
+    </div>
+  </div>
+
+  <!-- BODY -->
+  <div class="body">
+
+    <!-- SIDEBAR: 6 phases -->
+    <div class="sidebar">
+      <div class="phase" style="--pc:var(--p)">
+        <div class="phase-bar"></div>
+        <div class="phase-label">Topic<br>Input</div>
+      </div>
+      <div class="phase" style="--pc:var(--t)">
+        <div class="phase-bar"></div>
+        <div class="phase-label">Search &amp;<br>Collection</div>
+      </div>
+      <div class="phase" style="--pc:var(--o)">
+        <div class="phase-bar"></div>
+        <div class="phase-label">Content<br>Extraction</div>
+      </div>
+      <div class="phase" style="--pc:var(--b)">
+        <div class="phase-bar"></div>
+        <div class="phase-label">Signal<br>Enrichment</div>
+      </div>
+      <div class="phase" style="--pc:var(--pk)">
+        <div class="phase-bar"></div>
+        <div class="phase-label">Scoring &amp;<br>Prediction</div>
+      </div>
+      <div class="phase" style="--pc:var(--g)">
+        <div class="phase-bar"></div>
+        <div class="phase-label">Account<br>Discovery</div>
+      </div>
+    </div>
+
+    <!-- GRID: 11 cols × 6 rows -->
+    <div class="grid">
+
+      <!-- ROW 1: Topic Input — single centered node -->
+      <div class="cell" style="grid-column:1/6;grid-row:1">
+        <div class="node" style="--nc:var(--p)">
+          <div class="nn">01</div>
+          <div class="nt">Topic Input</div>
+          <div class="ns">ERP software · CRM · data warehouse</div>
+        </div>
+      </div>
+      <div class="arr" style="grid-column:6;grid-row:1">→</div>
+      <div class="cell" style="grid-column:7/12;grid-row:1">
+        <div class="node" style="--nc:var(--p)">
+          <div class="nn">02</div>
+          <div class="nt">Search Layer</div>
+          <div class="ns">Search engines · blogs · communities · news</div>
+        </div>
+      </div>
+
+      <!-- ROW 2: Collection -->
+      <div class="cell" style="grid-column:1/6;grid-row:2">
+        <div class="node" style="--nc:var(--t)">
+          <div class="nn">03</div>
+          <div class="nt">URL Collection</div>
+          <div class="ns">Crawled links · ranked sources · deduplication</div>
+        </div>
+      </div>
+      <div class="arr" style="grid-column:6;grid-row:2">→</div>
+      <div class="cell" style="grid-column:7/12;grid-row:2">
+        <div class="node" style="--nc:var(--t)">
+          <div class="nn">04</div>
+          <div class="nt">Content Extraction</div>
+          <div class="ns">Text · metadata · authors · publish date</div>
+        </div>
+      </div>
+
+      <!-- ROW 3: Extraction -->
+      <div class="cell" style="grid-column:1/5;grid-row:3">
+        <div class="node" style="--nc:var(--o)">
+          <div class="nn">05</div>
+          <div class="nt">Entity Extraction</div>
+          <div class="ns">Company · technology · person · role</div>
+        </div>
+      </div>
+      <div class="arr" style="grid-column:5;grid-row:3">→</div>
+      <div class="cell" style="grid-column:6/9;grid-row:3">
+        <div class="node" style="--nc:var(--o)">
+          <div class="nn">06</div>
+          <div class="nt">Company ID</div>
+          <div class="ns">Domain → company mapping</div>
+        </div>
+      </div>
+      <div class="arr" style="grid-column:9;grid-row:3">→</div>
+      <div class="cell" style="grid-column:10/12;grid-row:3">
+        <div class="node" style="--nc:var(--o); padding:8px 9px">
+          <div class="nn" style="font-size:7.5px">NER</div>
+          <div class="nt" style="font-size:10px">Disambiguation</div>
+          <div class="ns" style="font-size:8px">Alias resolution</div>
+        </div>
+      </div>
+
+      <!-- ROW 4: Enrichment -->
+      <div class="cell" style="grid-column:1/4;grid-row:4">
+        <div class="node" style="--nc:var(--b)">
+          <div class="nn">07</div>
+          <div class="nt">GitHub Signals</div>
+          <div class="ns">Commits · repos · stars</div>
+        </div>
+      </div>
+      <div class="cell" style="grid-column:4/8;grid-row:4">
+        <div class="node" style="--nc:var(--b)">
+          <div class="nn">08</div>
+          <div class="nt">Signal Enrichment</div>
+          <div class="ns">Hiring signals · job posts · tech install</div>
+        </div>
+      </div>
+      <div class="cell" style="grid-column:8/12;grid-row:4">
+        <div class="node" style="--nc:var(--b)">
+          <div class="nn">09</div>
+          <div class="nt">Feature Engineering</div>
+          <div class="ns">Signal velocity · committee detection</div>
+        </div>
+      </div>
+
+      <!-- ROW 5: Scoring -->
+      <div class="cell" style="grid-column:1/5;grid-row:5">
+        <div class="node" style="--nc:var(--pk)">
+          <div class="nn">10</div>
+          <div class="nt">Intent Scoring</div>
+          <div class="ns">Aggregated score per company per topic</div>
+        </div>
+      </div>
+      <div class="arr" style="grid-column:5;grid-row:5">→</div>
+      <div class="cell" style="grid-column:6/12;grid-row:5">
+        <div class="node" style="--nc:var(--pk)">
+          <div class="nn">11</div>
+          <div class="nt">Predictive Model</div>
+          <div class="ns">P(company will buy) · continuous retraining · calibrated output</div>
+        </div>
+      </div>
+
+      <!-- ROW 6: Output -->
+      <div class="cell" style="grid-column:1/12;grid-row:6;padding:10px 14px">
+        <div class="node out" style="width:100%;display:flex;align-items:center;gap:32px;padding:10px 20px">
+          <div style="flex-shrink:0">
+            <div class="nn" style="color:var(--g);font-size:9px;margin-bottom:4px">12 — OUTPUT</div>
+            <div class="nt" style="color:var(--g);font-size:13px">New Account Discovery</div>
+          </div>
+          <div style="width:1px;height:36px;background:rgba(45,122,31,.25);flex-shrink:0"></div>
+          <div class="ns" style="font-size:10px;line-height:1.6">
+            Companies showing buying intent for the topic — net-new accounts not previously in CRM, surfaced by signal density and predictive probability score
+          </div>
+          <div style="margin-left:auto;display:flex;gap:20px;flex-shrink:0">
+            <div style="text-align:center">
+              <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--g)">↑ P(buy)</div>
+              <div style="font-size:8.5px;color:var(--muted);margin-top:2px">Probability score</div>
+            </div>
+            <div style="text-align:center">
+              <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--g)">→ CRM</div>
+              <div style="font-size:8.5px;color:var(--muted);margin-top:2px">Sales activation</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /grid -->
+  </div><!-- /body -->
+</div>
+</body>
+</html>
